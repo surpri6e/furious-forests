@@ -1,21 +1,21 @@
 #pragma once 
 #include "../main.hpp"
 
-#include "../Core/Paths.hpp"
-#include "../Core/Constants.hpp"
+#include "../Paths.hpp"
+#include "../Constants.hpp"
+#include "../Utils/Wrongs.hpp"
 
-void textureInitilize(sf::Texture& texture, const std::string& pathToTexture) {
+void textureInitialize(sf::Texture& texture, const std::string& pathToTexture) {
 	if (!texture.loadFromFile(pathToTexture)) {
-		std::cerr << consts::others::DIVIDING_LINE << " WRONG WITH INITILIZE TEXTURE " << consts::others::DIVIDING_LINE << std::endl;
+		Wrongs::add(WRONG_WITH_INITIALIZE_TEXTURE);
 	}
 	else {
-		std::cout << consts::others::DIVIDING_LINE << " TEXTURE INITILIZE CORRECT " << consts::others::DIVIDING_LINE << std::endl;
+		std::cout << consts::others::DIVIDING_LINE << " TEXTURE INITIALIZE CORRECT " << consts::others::DIVIDING_LINE << std::endl;
 	}
 }
 
 class TexturesManager {
 private:
-
 	// HEROS
 	sf::Texture merchantHero;
 
@@ -51,47 +51,49 @@ private:
 	sf::Texture exitButton;
 	sf::Texture settingsButton;
 	sf::Texture backgroundImage;
-
 public:
-
-	// Initilize all textures  
+	// Initialize all textures  
 	TexturesManager() {
+		// DEBUG MODE ALL
 		
 		// HEROS
-		textureInitilize(this->merchantHero, paths::previousDirectory + paths::textures::heros::MERCHANT_HERO);
+		textureInitialize(this->merchantHero, paths::previousDirectory + paths::textures::heros::MERCHANT_HERO);
 
 		// PLAYERS
-		textureInitilize(this->malePlayer, paths::previousDirectory + paths::textures::players::MALE_PLAYER);
-		textureInitilize(this->femalePlayer, paths::previousDirectory + paths::textures::players::FEMALE_PLAYER);
+		textureInitialize(this->malePlayer, paths::previousDirectory + paths::textures::players::MALE_PLAYER);
+		textureInitialize(this->femalePlayer, paths::previousDirectory + paths::textures::players::FEMALE_PLAYER);
 
 		// TREES
-		textureInitilize(this->smallDarkTree, paths::previousDirectory + paths::textures::trees::SMALL_DARK_TREE);
-		textureInitilize(this->bigDarkTree, paths::previousDirectory + paths::textures::trees::BIG_DARK_TREE);
-		textureInitilize(this->bigLightTree, paths::previousDirectory + paths::textures::trees::BIG_LIGHT_TREE);
+		textureInitialize(this->smallDarkTree, paths::previousDirectory + paths::textures::trees::SMALL_DARK_TREE);
+		textureInitialize(this->bigDarkTree, paths::previousDirectory + paths::textures::trees::BIG_DARK_TREE);
+		textureInitialize(this->bigLightTree, paths::previousDirectory + paths::textures::trees::BIG_LIGHT_TREE);
 
 		// CLOUDS 
-		textureInitilize(this->smallCloud, paths::previousDirectory + paths::textures::clouds::SMALL_CLOUD);
+		textureInitialize(this->smallCloud, paths::previousDirectory + paths::textures::clouds::SMALL_CLOUD);
 
 		// ROCKS
-		textureInitilize(this->standartRock, paths::previousDirectory + paths::textures::rocks::STANDART_ROCK);
+		textureInitialize(this->standartRock, paths::previousDirectory + paths::textures::rocks::STANDART_ROCK);
 
 		// GRASS 
-		textureInitilize(this->lightGrass, paths::previousDirectory + paths::textures::grass::LIGHT_GRASS);
+		textureInitialize(this->lightGrass, paths::previousDirectory + paths::textures::grass::LIGHT_GRASS);
 
 		// HUD
-		textureInitilize(this->xpBorder, paths::previousDirectory + paths::textures::hud::XP_BORDER);
-		textureInitilize(this->xpInside, paths::previousDirectory + paths::textures::hud::XP_INSIDE);
+		textureInitialize(this->xpBorder, paths::previousDirectory + paths::textures::hud::XP_BORDER);
+		textureInitialize(this->xpInside, paths::previousDirectory + paths::textures::hud::XP_INSIDE);
 
 		// ICONS
-		textureInitilize(this->checkboxFalse, paths::previousDirectory + paths::textures::icons::CHECKBOX_FALSE);
-		textureInitilize(this->checkboxTrue, paths::previousDirectory + paths::textures::icons::CHECKBOX_TRUE);
-		textureInitilize(this->coin, paths::previousDirectory + paths::textures::icons::COIN);
+		textureInitialize(this->checkboxFalse, paths::previousDirectory + paths::textures::icons::CHECKBOX_FALSE);
+		textureInitialize(this->checkboxTrue, paths::previousDirectory + paths::textures::icons::CHECKBOX_TRUE);
+		textureInitialize(this->coin, paths::previousDirectory + paths::textures::icons::COIN);
 
 		// MENU 
-		textureInitilize(this->playButton, paths::previousDirectory + paths::textures::menu::PLAY_BUTTON);
-		textureInitilize(this->exitButton, paths::previousDirectory + paths::textures::menu::EXIT_BUTTON);
-		textureInitilize(this->settingsButton, paths::previousDirectory + paths::textures::menu::SETTINGS_BUTTON);
-		textureInitilize(this->backgroundImage, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE);
+		textureInitialize(this->playButton, paths::previousDirectory + paths::textures::menu::PLAY_BUTTON);
+		textureInitialize(this->exitButton, paths::previousDirectory + paths::textures::menu::EXIT_BUTTON);
+		textureInitialize(this->settingsButton, paths::previousDirectory + paths::textures::menu::SETTINGS_BUTTON);
+		textureInitialize(this->backgroundImage, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE);
 	}
 
+	const sf::Texture& getBackgroundImage() const {
+		return this->backgroundImage;
+	}
 };

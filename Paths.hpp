@@ -1,5 +1,5 @@
 #pragma once 
-#include "../main.hpp"
+#include "main.hpp"
 
 namespace paths {
 	const std::string previousDirectory = "../../../";
@@ -84,5 +84,11 @@ namespace paths {
 		const std::string directoryName = "musics/";
 
 		const std::string MAIN = directoryName + "main.mp3";
+	}
+
+	namespace saves {
+		const std::string directoryName = "saves/";
+
+		const std::string SETTINGS = directoryName + "settings.txt";
 	}
 }

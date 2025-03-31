@@ -10,9 +10,13 @@ project ("furious-forests")
 add_executable (furious-forests 
 	"main.cpp" 
 	"main.hpp"   
-	"Core/Paths.hpp"
-	"Core/Constants.hpp"
+	"Paths.hpp"
+	"Constants.hpp"
 	"Managers/TexturesManager.hpp"
+	"Menu/Menu.hpp"
+	"Core/General.hpp"
+	"Core/Settings.hpp"
+	"Parcers/SettingsParcer.hpp"
  )
 
 target_link_libraries(furious-forests ${CMAKE_SOURCE_DIR}/libraries/sfml-graphics-d.lib)

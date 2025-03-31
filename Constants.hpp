@@ -1,9 +1,13 @@
 #pragma once
-#include "../main.hpp"
+#include "main.hpp"
 
 namespace consts {
-	const int HEIGHT_WINDOW = 1080;
-	const int WIDTH_WINDOW = 1920;
+	const int HEIGHT_SCREEN = 1080;
+	const int WIDTH_SCREEN = 1920;
+
+	const int STANDART_TEXTURE_SIZE = 64;
+
+	const int STANDART_TILE_SIZE = 128;
 
 	namespace signs {
 		const std::string EMPTY = "0";
@@ -14,7 +18,7 @@ namespace consts {
 		}
 
 		namespace grass {
-			const std::string LIGHTEN_GRASS = "1";
+			const std::string LIGHT_GRASS = "1";
 		}
 
 		namespace trees {
