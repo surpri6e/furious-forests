@@ -4,9 +4,19 @@
 #include "Managers/TexturesManager.hpp"
 #include "Menu/Menu.hpp"
 #include "Core/General.hpp"
+#include "Core/Settings.hpp"
 
 int main() {
-    General G("Furious forests");
+    Settings settings;
+
+    std::cout << settings.getFramerateLimit() << std::endl;
+    std::cout << settings.getHeightWindow() << std::endl;
+    std::cout << settings.getWidthWindow() << std::endl;
+    std::cout << settings.getIsBackgroundMusicPlaying() << std::endl;
+    std::cout << settings.getIsWindowFullscreen() << std::endl;
+    std::cout << settings.getPlayerGender() << std::endl;
+    //sf::RenderWindow;
+    //General G("Furious forests");
 
     // Заново перепроверить всю систему, тем более касаемо парсера настроек
 

@@ -7,25 +7,7 @@
 
 namespace fs = std::filesystem;
 
-enum SettingsInterface {
-	WIDTH_WINDOW,
-	HEIGHT_WINDOW,
-	FRAMERATE_LIMIT,
-	IS_WINDOW_FULLSCREEN,
-	IS_BACKGROUND_MUSIC_PLAYING,
-	PLAYER_GENDER,
-};
-
-void setDefaultSettings(std::ofstream& draw) {
-	draw << std::to_string(consts::WIDTH_SCREEN) << std::endl;
-	draw << std::to_string(consts::HEIGHT_SCREEN) << std::endl;
-	draw << "60" << std::endl;
-	draw << "TRUE" << std::endl;
-	draw << "TRUE" << std::endl;
-	draw << "MALE" << std::endl;
-}
-
-std::map<SettingsInterface, std::string> parceSettings() {
+std::map<std::string, std::string> parceSettings() {
 	std::ofstream draw;
 	std::ifstream read;
 
@@ -37,9 +19,6 @@ std::map<SettingsInterface, std::string> parceSettings() {
 			draw.close();
 			Wrongs::add(WRONG_WITH_OPEN_SETTINGS);
 		}
-		else {
-			setDefaultSettings(draw);
-		}
 	}
 
 	// Предположим, что никто не имеет доступа к этому файлу, следовательно никто не сможет изменить его не по правилам, следовательно не возникнет лишних ошибок
@@ -48,14 +27,26 @@ std::map<SettingsInterface, std::string> parceSettings() {
 	// DEBUG MODE
 	read.open(paths::previousDirectory + paths::saves::SETTINGS);
 
-	int counter = 0;
 	std::string line = "";
 
-	std::map<SettingsInterface, std::string> parcedSettings;
+	std::map<std::string, std::string> parcedSettings;
 
 	while (std::getline(read, line)) {
-		parcedSettings.insert(std::make_pair((SettingsInterface)counter, line));
-		counter++;
+		std::string elementOfSettingsInterface = "";
+		std::string valueOfSettingsInterface = "";
+
+		// SLOW ALGORITHM
+		std::size_t deep = line.find(' ');
+
+		for (std::size_t i = 0; i < deep; i++) {
+			elementOfSettingsInterface.push_back(line[i]);
+		}
+
+		for (std::size_t i = deep + 1; i < line.length(); i++) {
+			valueOfSettingsInterface.push_back(line[i]);
+		}
+
+		parcedSettings.insert(std::make_pair(elementOfSettingsInterface, valueOfSettingsInterface));
 	}
 	
 	read.close();

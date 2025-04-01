@@ -3,12 +3,14 @@
 
 enum WrongsInterface {
 	WRONG_WITH_INITIALIZE_TEXTURE,
-	WRONG_WITH_OPEN_SETTINGS
+	WRONG_WITH_OPEN_SETTINGS,
+	WRONG_WITH_SAVE_SETTINGS
 };
 
 std::map<WrongsInterface, std::string> pairsOfWrongsInterface = {
 	{WRONG_WITH_INITIALIZE_TEXTURE, "WRONG_WITH_INITIALIZE_TEXTURE"},
 	{WRONG_WITH_OPEN_SETTINGS, "WRONG_WITH_OPEN_SETTINGS"},
+	{WRONG_WITH_SAVE_SETTINGS, "WRONG_WITH_SAVE_SETTINGS"},
 };
 
 std::string fromWrongsInterfaceToString(const WrongsInterface& wrongsInterface) {
@@ -27,6 +29,12 @@ public:
 		}
 
 		if (wrongsInterface == 1) {
+			std::cerr << consts::others::DIVIDING_LINE << " " << fromWrongsInterfaceToString(wrongsInterface) << " " << consts::others::DIVIDING_LINE << std::endl;
+			Wrongs::printWrongsCounter();
+			exit(wrongsInterface);
+		}
+
+		if (wrongsCounter == 2) {
 			std::cerr << consts::others::DIVIDING_LINE << " " << fromWrongsInterfaceToString(wrongsInterface) << " " << consts::others::DIVIDING_LINE << std::endl;
 			Wrongs::printWrongsCounter();
 			exit(wrongsInterface);

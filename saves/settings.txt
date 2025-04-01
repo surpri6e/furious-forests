@@ -1,6 +1,6 @@
-1920
-1080
-60
-TRUE
-TRUE
-MALE
+framerateLimit 60
+heightWindow 1080
+widthWindow 20000
+isBackgroundMusicPlaying 1
+isWindowFullscreen 1
+playerGender 0
