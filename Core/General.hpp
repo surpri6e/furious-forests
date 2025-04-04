@@ -8,20 +8,14 @@ class General {
 private:
 	const std::unique_ptr<const TexturesManager> texturesManager = std::make_unique<TexturesManager>(TexturesManager());
 
-	//sf::RenderWindow& window;
+	sf::RenderWindow& window;
 	sf::Clock clock;
 	sf::View camera;
 
-	Settings settings;
+	Settings& settings;
 public:
-	General(const std::string& title) {
-		//this->window = sf::RenderWindow(
-		//	sf::VideoMode({ (unsigned int)this->settings.getWidthWindow() , (unsigned int)this->settings.getHeightWindow() }),
-		//	title,
-		//	this->settings.getIsWindowFullscreen()
-		//);
-
-		//window.setSe
+	General(sf::RenderWindow& window, Settings& settings) : window(window), settings(settings) {
+		
 	}
 
 	sf::View& getCamera() {
@@ -32,9 +26,13 @@ public:
 		return this->clock;
 	}
 
-	//sf::RenderWindow& getWindow() {
-	//	return this->window;
-	//}
+	sf::RenderWindow& getWindow() {
+		return this->window;
+	}
+
+	Settings& getSettings() {
+		return this->settings;
+	}
 
 	const TexturesManager* getTexturesManager() {
 		return this->texturesManager.get();

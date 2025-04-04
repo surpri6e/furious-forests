@@ -8,15 +8,15 @@
 namespace fs = std::filesystem;
 
 std::map<std::string, std::string> parceSettings() {
-	std::ofstream draw;
+	std::ofstream write;
 	std::ifstream read;
 
 	// DEBUG MODE
 	if (!fs::exists(paths::previousDirectory + paths::saves::SETTINGS)) {
-		draw.open(paths::previousDirectory + paths::saves::SETTINGS);
+		write.open(paths::previousDirectory + paths::saves::SETTINGS);
 
-		if (!draw.is_open()) {
-			draw.close();
+		if (!write.is_open()) {
+			write.close();
 			Wrongs::add(WRONG_WITH_OPEN_SETTINGS);
 		}
 	}
@@ -50,7 +50,7 @@ std::map<std::string, std::string> parceSettings() {
 	}
 	
 	read.close();
-	draw.close();
+	write.close();
 
 	return parcedSettings;
 }

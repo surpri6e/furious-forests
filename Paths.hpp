@@ -3,9 +3,13 @@
 
 namespace paths {
 	const std::string previousDirectory = "../../../";
+
+    // Названия файлова сделать отдельн
 	
 	namespace textures {
 		const std::string directoryName = "textures/";
+
+		const std::string sizes = directoryName + "textures_sizes.txt";
 
 		namespace menu {
 			const std::string directoryName = "menu/";

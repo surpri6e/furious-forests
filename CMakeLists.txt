@@ -17,6 +17,7 @@ add_executable (furious-forests
 	"Core/General.hpp"
 	"Core/Settings.hpp"
 	"Parcers/SettingsParcer.hpp"
+	"Parcers/TexturesSizesParcer.hpp"
  )
 
 target_link_libraries(furious-forests ${CMAKE_SOURCE_DIR}/libraries/sfml-graphics-d.lib)

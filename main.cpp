@@ -1,53 +1,83 @@
 ﻿#include "main.hpp"
 
-#include "Paths.hpp"
-#include "Managers/TexturesManager.hpp"
-#include "Menu/Menu.hpp"
 #include "Core/General.hpp"
 #include "Core/Settings.hpp"
 
+#include "Menu/Menu.hpp"
+#include "Parcers/TexturesSizesParcer.hpp"
+#include "Paths.hpp"
+
 int main() {
     Settings settings;
-
-    std::cout << settings.getFramerateLimit() << std::endl;
-    std::cout << settings.getHeightWindow() << std::endl;
-    std::cout << settings.getWidthWindow() << std::endl;
-    std::cout << settings.getIsBackgroundMusicPlaying() << std::endl;
-    std::cout << settings.getIsWindowFullscreen() << std::endl;
-    std::cout << settings.getPlayerGender() << std::endl;
-    //sf::RenderWindow;
-    //General G("Furious forests");
-
-    // Заново перепроверить всю систему, тем более касаемо парсера настроек
-
-    /*auto g = std::make_unique<General>(General("a"));
-    g.*/
     
+    sf::RenderWindow window(
+        sf::VideoMode({ (unsigned int)settings.getWidthWindow(), (unsigned int)settings.getHeightWindow() }),
+        "Furious forests",
+        settings.getIsWindowFullscreen() ? sf::State::Fullscreen : sf::State::Windowed
+    );
+
+    auto parcedTexturesSizes = parceTexturesSizes();
+
+    std::cout << parcedTexturesSizes[paths::textures::menu::PLAY_BUTTON].first << parcedTexturesSizes[paths::textures::menu::PLAY_BUTTON].second << std::endl;
+
+    General G(window, settings);
+
+    auto m = std::make_unique<Menu>(Menu(G));
+    
+    //auto menu = std::make_unique<Menu>(Menu(G));
+    decltype(auto) clock = G.getClock();
+    float time = clock.getElapsedTime().asSeconds();
+
+    while (window.isOpen()) {
+
+        time = clock.getElapsedTime().asSeconds();
+
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>()) {
+                window.close();
+            }
+
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
+            {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                    //window.close();
+                    // m.reset();
+                }
+            }
+
+            if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mouseButtonPressed->button == sf::Mouse::Button::Left)
+                {
+                    m.reset();
+                    //std::cout << "the right button was pressed" << std::endl;
+                    //std::cout << "mouse x: " << mouseButtonPressed->position.x << std::endl;
+                    //std::cout << "mouse y: " << mouseButtonPressed->position.y << std::endl;
+                }
+            }
+        }
+
+        std::cout << time << std::endl;
+
+        window.clear(sf::Color::Blue);
+
+        //menu.get()->showMenu(window);
+        if (!(m.get() == nullptr)) {
+            m.get()->showMenu(window);
+        }
+
+        /*if (time > 5) {
+            m.reset();
+        }*/
 
 
-    //int posLeft = 0;
-    //sh.setSize(sf::Vector2f(30, 30));
-    //sh.setPosition(sf::Vector2f(posLeft, 0));
-    //sh.setFillColor(sf::Color::Blue);
-
-    // run the program as long as the window is open
-    //while (window.isOpen())
-    //{
-        //time = clock.getElapsedTime().asMilliseconds();
-        // check all the window's events that were triggered since the last iteration of the loop
-        //while (const std::optional event = window.pollEvent())
-        //{
-            // "close requested" event: we close the window
-            //if (event->is<sf::Event::Closed>())
-                //window.close();
-
-           // m.showMenu(window);
-
-       // }
+        // Это гарантирует, что не нужнро в функция отрисовки писать .display()
+        window.display();
 
         // clear the window with black color
         // ОЧИЩАТЬ КОНСОЛЬ ПРИ КАЖДОМ РЕНДЕРИНГЕ 
-        //window.clear(sf::Color::Black);
+        //window.clear(sf::Color::Blue);
 
         //if (time > 10) {
          //   clock.restart();
@@ -61,6 +91,6 @@ int main() {
         // window.draw(...);
 
         // end the current frame
-        //window.display();
-    //}
+        
+    }
 }

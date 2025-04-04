@@ -4,6 +4,7 @@
 #include "../Paths.hpp"
 #include "../Constants.hpp"
 #include "../Utils/Wrongs.hpp"
+#include "../Parcers/TexturesSizesParcer.hpp"
 
 void textureInitialize(sf::Texture& texture, const std::string& pathToTexture) {
 	if (!texture.loadFromFile(pathToTexture)) {
@@ -16,6 +17,8 @@ void textureInitialize(sf::Texture& texture, const std::string& pathToTexture) {
 
 class TexturesManager {
 private:
+	std::map<std::string, std::pair<int, int>> texturesSizes;
+
 	// HEROS
 	sf::Texture merchantHero;
 
@@ -91,9 +94,27 @@ public:
 		textureInitialize(this->exitButton, paths::previousDirectory + paths::textures::menu::EXIT_BUTTON);
 		textureInitialize(this->settingsButton, paths::previousDirectory + paths::textures::menu::SETTINGS_BUTTON);
 		textureInitialize(this->backgroundImage, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE);
+
+		this->texturesSizes = parceTexturesSizes();
+	}
+
+	const std::map<std::string, std::pair<int, int>>& getTexturesSizes() const {
+		return this->texturesSizes;
 	}
 
 	const sf::Texture& getBackgroundImage() const {
 		return this->backgroundImage;
+	}
+
+	const sf::Texture& getPlayButton() const {
+		return this->playButton;
+	}
+
+	const sf::Texture& getExitButton() const {
+		return this->exitButton;
+	}
+
+	const sf::Texture& getSettingsButton() const {
+		return this->settingsButton;
 	}
 };
