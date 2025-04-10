@@ -19,6 +19,8 @@ namespace paths {
 			const std::string EXIT_BUTTON = paths::textures::directoryName + directoryName + "exit_button.png";
 
 			const std::string BACKGROUND_IMAGE = paths::textures::directoryName + directoryName + "background_image.png";
+
+			const std::string BACKGROUND_SETTINGS = paths::textures::directoryName + directoryName + "background_settings.png";
 		}
 
 		namespace players {
