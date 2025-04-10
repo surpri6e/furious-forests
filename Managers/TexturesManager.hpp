@@ -54,6 +54,7 @@ private:
 	sf::Texture exitButton;
 	sf::Texture settingsButton;
 	sf::Texture backgroundImage;
+	sf::Texture backgroundSettings;
 public:
 	// Initialize all textures  
 	TexturesManager() {
@@ -94,12 +95,17 @@ public:
 		textureInitialize(this->exitButton, paths::previousDirectory + paths::textures::menu::EXIT_BUTTON);
 		textureInitialize(this->settingsButton, paths::previousDirectory + paths::textures::menu::SETTINGS_BUTTON);
 		textureInitialize(this->backgroundImage, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE);
+		textureInitialize(this->backgroundSettings, paths::previousDirectory + paths::textures::menu::BACKGROUND_SETTINGS);
 
 		this->texturesSizes = parceTexturesSizes();
 	}
 
 	const std::map<std::string, std::pair<int, int>>& getTexturesSizes() const {
 		return this->texturesSizes;
+	}
+
+	const sf::Texture& getBackgroundSettings() const {
+		return this->backgroundSettings;
 	}
 
 	const sf::Texture& getBackgroundImage() const {

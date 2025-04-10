@@ -2,3 +2,4 @@ textures/menu/play_button.png 88 28
 textures/menu/settings_button.png 168 28
 textures/menu/exit_button.png 84 28
 textures/menu/background_image.png 400 200
+textures/menu/background_settings.png 200 400

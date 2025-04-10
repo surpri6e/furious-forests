@@ -4,6 +4,7 @@
 #include "../Core/General.hpp"
 #include "../Paths.hpp"
 #include "../Utils/InitializeShape.hpp"
+#include "MenuSettings.hpp"
 
 struct MouseMiniInformation {
 	int x;
@@ -13,6 +14,8 @@ struct MouseMiniInformation {
 
 class Menu {
 private:
+	//std::unique_ptr<MenuSettings> menuSettings = nullptr;
+
 	sf::RectangleShape backgroundImage;
 
 	sf::RectangleShape playButton;
@@ -40,7 +43,7 @@ private:
 
 	int numberOfMenu;
 
-	const int animationDuration = 200;
+	const int animationDuration = 1000;
 
 	bool isMouseEnteredExitButton;
 	bool isMouseEnteredSettingsButton;
@@ -380,7 +383,7 @@ public:
 			this->isMouseEnteredPlayButton = false;
 		}
 
-		if (this->isMouseEnteredExitButton || this->isMouseEnteredSettingsButton || this->isMouseEnteredPlayButton) {
+		if ((this->isMouseEnteredExitButton || this->isMouseEnteredSettingsButton || this->isMouseEnteredPlayButton)) { // && this->menuSettings.get() == nullptr
 			// This dynamic memory or not?
 			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
 			window.setMouseCursor(cursor);
@@ -401,20 +404,25 @@ public:
 			window.close();
 		}
 
-		if (numberOfMenu == 2 && this->mouseMiniInformation.isLeftButtonClicked) {
-			window.close();
-		} 
+		/*if (numberOfMenu == 2 && this->mouseMiniInformation.isLeftButtonClicked) {
+			this->menuSettings.reset(new MenuSettings(G));
+		} */
 		
-		window.draw(playButtonBackground);
-		window.draw(settingsButtonBackground);
-		window.draw(exitButtonBackground);
+		//if (this->menuSettings.get() == nullptr) {
+			window.draw(playButtonBackground);
+			window.draw(settingsButtonBackground);
+			window.draw(exitButtonBackground);
 
-		window.draw(playButtonMask);
-		window.draw(settingsButtonMask);
-		window.draw(exitButtonMask);
+			window.draw(playButtonMask);
+			window.draw(settingsButtonMask);
+			window.draw(exitButtonMask);
 
-		window.draw(playButton);
-		window.draw(settingsButton);
-		window.draw(exitButton);
+			window.draw(playButton);
+			window.draw(settingsButton);
+			window.draw(exitButton);
+		//}
+		/*else {
+			this->menuSettings.get()->showMenuSettings(G);
+		}*/
 	}
 };
