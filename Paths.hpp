@@ -4,8 +4,6 @@
 namespace paths {
 	const std::string previousDirectory = "../../../";
 
-    // Названия файлова сделать отдельн
-	
 	namespace textures {
 		const std::string directoryName = "textures/";
 
@@ -14,11 +12,16 @@ namespace paths {
 		namespace menu {
 			const std::string directoryName = "menu/";
 
+			const std::string BACKGROUND_IMAGE_MENU = paths::textures::directoryName + directoryName + "background_image_menu.png";
+			const std::string SETTINGS_BORDER_MENU = paths::textures::directoryName + directoryName + "settings_border_menu.png";
+		}
+
+		namespace buttons {
+			const std::string directoryName = "buttons/";
+
 			const std::string PLAY_BUTTON = paths::textures::directoryName + directoryName + "play_button.png";
 			const std::string SETTINGS_BUTTON = paths::textures::directoryName + directoryName + "settings_button.png";
 			const std::string EXIT_BUTTON = paths::textures::directoryName + directoryName + "exit_button.png";
-
-			const std::string BACKGROUND_IMAGE = paths::textures::directoryName + directoryName + "background_image.png";
 		}
 
 		namespace players {
@@ -78,9 +81,10 @@ namespace paths {
 		}
 	}
 
-	namespace audios {
-		const std::string directoryName = "audios/";
+	namespace sounds {
+		const std::string directoryName = "sounds/";
 
+		const std::string ENTER_ELEMENT = directoryName + "enter_element.wav";
 		const std::string WALK_GRASS = directoryName + "walk_grass.wav";
 	}
 
@@ -94,5 +98,11 @@ namespace paths {
 		const std::string directoryName = "saves/";
 
 		const std::string SETTINGS = directoryName + "settings.txt";
+	}
+
+	namespace fonts {
+		const std::string directoryName = "fonts/";
+
+		const std::string MAIN = directoryName + "Sabo-Filled.otf";
 	}
 }

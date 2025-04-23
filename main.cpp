@@ -3,86 +3,90 @@
 #include "Core/General.hpp"
 #include "Core/Settings.hpp"
 #include "Menu/Menu.hpp"
-
+#include "Core/InputsObserver.hpp"
 
 int main() {
-    Settings settings;
-    sf::RenderWindow window(
+    // USE DYNAMIC MEMORY
+    auto settings = Settings();
+    auto inputsObserver = InputsObserver();
+
+    auto window = sf::RenderWindow(
         sf::VideoMode({ (unsigned int)settings.getWidthWindow(), (unsigned int)settings.getHeightWindow() }),
         "Furious forests",
         settings.getIsWindowFullscreen() ? sf::State::Fullscreen : sf::State::Windowed
     );
-    General G(window, settings);
 
-    window.setVisible(true);
+    auto G = General(window, settings, inputsObserver);
 
     auto menu = std::make_unique<Menu>(Menu(G));
 
-    decltype(auto) clock = G.getClock();
-    std::uint32_t time = clock.getElapsedTime().asMilliseconds();
+   /* G.getSoundsManager()->getEnterElement().setVolume(100.f);
+    G.getSoundsManager()->getEnterElement().play();*/
 
-    // Пока без этой переменной не обойтись
-    bool justLeftButtonPressed = false;
+    sf::SoundBuffer b;
+
+    initializer::soundBufferInitialize(b, paths::previousDirectory + paths::sounds::ENTER_ELEMENT);
+
+    sf::Sound s(b);
+
+    s.setLooping(true);
+    s.setVolume(100.f);
+    s.play();
+
     while (window.isOpen()) {
-
-        time = clock.getElapsedTime().asMilliseconds();
-
-        while (const std::optional event = window.pollEvent())
-        {
+        while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
 
-            /*if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-            {
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-                    
-                }
-            }*/
-
-            if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>())
-            {
-                // Этот обработчик нулевого указателя оптимизировать
-                if (!(menu.get() == nullptr)) {
-                    menu.get()->changeMouseMiniInformation(mouseMoved->position.x, mouseMoved->position.y, justLeftButtonPressed);
-                }
+            if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
+                inputsObserver.setMousePositionX(mouseMoved->position.x);
+                inputsObserver.setMousePositionY(mouseMoved->position.y);
             }
 
-            if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
-            {
-                if (mouseButtonPressed->button == sf::Mouse::Button::Left)
-                {
-                    justLeftButtonPressed = true;
-                    // Этот обработчик нулевого указателя оптимизировать
-                    if (!(menu.get() == nullptr)) {
-                        menu.get()->changeMouseMiniInformation(mouseButtonPressed->position.x, mouseButtonPressed->position.y, justLeftButtonPressed);
-                    }
-                }
+            if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouseButtonPressed->button == sf::Mouse::Button::Left) inputsObserver.setIsLeftMouseButtonPressed(true);
+                if (mouseButtonPressed->button == sf::Mouse::Button::Right) inputsObserver.setIsRightMouseButtonPressed(true);
             }
 
-            if (const auto* mouseButtonReleased = event->getIf<sf::Event::MouseButtonReleased>())
-            {
-                if (mouseButtonReleased->button == sf::Mouse::Button::Left)
-                {
-                    justLeftButtonPressed = false;
-                    // Этот обработчик нулевого указателя оптимизировать
-                    if (!(menu.get() == nullptr)) {
-                        menu.get()->changeMouseMiniInformation(mouseButtonReleased->position.x, mouseButtonReleased->position.y, justLeftButtonPressed);
-                    }
-                }
+            if (const auto* mouseButtonReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
+                if (mouseButtonReleased->button == sf::Mouse::Button::Left) inputsObserver.setIsLeftMouseButtonPressed(false);
+                if (mouseButtonReleased->button == sf::Mouse::Button::Right) inputsObserver.setIsRightMouseButtonPressed(false);
+            }
+
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) inputsObserver.setIsEscapePressed(true);
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Enter) inputsObserver.setIsEnterPressed(true);
+
+                if (keyPressed->scancode == sf::Keyboard::Scancode::W) inputsObserver.setIsWPressed(true);
+                if (keyPressed->scancode == sf::Keyboard::Scancode::A) inputsObserver.setIsAPressed(true);
+                if (keyPressed->scancode == sf::Keyboard::Scancode::S) inputsObserver.setIsSPressed(true);
+                if (keyPressed->scancode == sf::Keyboard::Scancode::D) inputsObserver.setIsDPressed(true);
+
+                if (keyPressed->scancode == sf::Keyboard::Scancode::E) inputsObserver.setIsEPressed(true);
+            }
+
+            if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
+                if (keyReleased->scancode == sf::Keyboard::Scancode::Escape) inputsObserver.setIsEscapePressed(false);
+                if (keyReleased->scancode == sf::Keyboard::Scancode::Enter) inputsObserver.setIsEnterPressed(false);
+
+                if (keyReleased->scancode == sf::Keyboard::Scancode::W) inputsObserver.setIsWPressed(false);
+                if (keyReleased->scancode == sf::Keyboard::Scancode::A) inputsObserver.setIsAPressed(false);
+                if (keyReleased->scancode == sf::Keyboard::Scancode::S) inputsObserver.setIsSPressed(false);
+                if (keyReleased->scancode == sf::Keyboard::Scancode::D) inputsObserver.setIsDPressed(false);
+
+                if (keyReleased->scancode == sf::Keyboard::Scancode::E) inputsObserver.setIsEPressed(false);
             }
         }
-        // ОЧИЩАТЬ КОНСОЛЬ ПРИ КАЖДОМ РЕНДЕРИНГЕ 
+
+        // CLEAR ON EVERY RENDER!
         window.clear(sf::Color::Black);
 
-
-        // Этот обработчик нулевого указателя оптимизировать
-        if (!(menu.get() == nullptr)) {
+        if (menu.get() != nullptr) {
             menu.get()->showMenu(G);
         }
 
-
-        // Это гарантирует, что не нужно в функция отрисовки писать .display()
+        // .display() ONLY HERE!
         window.display();
     }
 }

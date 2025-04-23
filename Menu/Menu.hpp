@@ -2,419 +2,215 @@
 #include "../main.hpp"
 
 #include "../Core/General.hpp"
-#include "../Paths.hpp"
-#include "../Utils/InitializeShape.hpp"
+#include "../Utils/Initializer.hpp"
+#include "../Utils/AnimationFiller.hpp"
+#include "MenuSettings.hpp"
+#include "../Utils/ModifyShapes.hpp"
 
-struct MouseMiniInformation {
-	int x;
-	int y;
-	bool isLeftButtonClicked;
+
+// Для анимации при старте меню, когда нужно будет двигат сразу 3 спрайта сделать функцию основанную на reference_wrapper
+
+// GOOD PRACTICE
+struct MenuShapes {
+	sf::RectangleShape backgroundImage;
+
+	sf::RectangleShape playButton;
+	sf::RectangleShape playButtonBackground;
+	sf::RectangleShape playButtonMask;
+
+	sf::RectangleShape settingsButton;
+	sf::RectangleShape settingsButtonBackground;
+	sf::RectangleShape settingsButtonMask;
+
+	sf::RectangleShape exitButton;
+	sf::RectangleShape exitButtonBackground;
+	sf::RectangleShape exitButtonMask;
 };
 
 class Menu {
 private:
-	sf::RectangleShape backgroundImage;
+	const int mSpaceBetweenButtons = 30;
+	const int mIndent = 100;
 
-	sf::RectangleShape playButton;
-	sf::RectangleShape settingsButton;
-	sf::RectangleShape exitButton;
+	const sf::Color mBackgroundButtonsColor = sf::Color(211, 249, 188);
+	const sf::Color mMaskButtonsColor = sf::Color(53, 98, 13, 0.4 * 255);
 
-	sf::RectangleShape playButtonBackground;
-	sf::RectangleShape playButtonMask;
+	std::unique_ptr<MenuSettings> pMenuSettings = nullptr;
 
-	sf::RectangleShape settingsButtonBackground;
-	sf::RectangleShape settingsButtonMask;
+	std::unique_ptr<MenuShapes> pShapes = std::make_unique<MenuShapes>();
 
-	sf::RectangleShape exitButtonBackground;
-	sf::RectangleShape exitButtonMask;
+	AnimationFiller mExitButtonAnimation;
+	AnimationFiller mSettingsButtonAnimation;
+	AnimationFiller mPlayButtonAnimation;
 
-	const sf::Color backgroundButtonsColor = sf::Color(211, 249, 188);
-	const sf::Color maskButtonsColor = sf::Color(171, 247, 124, 0.9 * 255);
+	int mNumberOfMenu;
 
-	//const sf::Color maskButtonsColor = sf::Color(80, 145, 39, 0.75 * 255);
+	bool mIsMenuInitialazed;
+	const std::uint32_t mAnimationDurationMenuInitializing = 500;
+	std::uint32_t mTimeForAnimationMenuInitializing;
 
-	const int spaceBetweenButtons = 30;
-	const int indent = 100;
-
-	MouseMiniInformation mouseMiniInformation;
-
-	int numberOfMenu;
-
-	const int animationDuration = 200;
-
-	bool isMouseEnteredExitButton;
-	bool isMouseEnteredSettingsButton;
-	bool isMouseEnteredPlayButton;
-	
-	std::uint32_t timeForAnimationForwardExitButton;
-	std::uint32_t timeForAnimationBackExitButton;
-
-	std::uint32_t timeForAnimationForwardSettingsButton;
-	std::uint32_t timeForAnimationBackSettingsButton;
-
-	std::uint32_t timeForAnimationForwardPlayButton;
-	std::uint32_t timeForAnimationBackPlayButton;
-
-	float playButtonMaskFilled;
-	float settingsButtonMaskFilled;
-	float exitButtonMaskFilled;
+	// можно просто в функцию вынести, зачем оно тут?
+	bool mIsShowCursorButtons;
 public:
-	Menu(General& G) {
-		decltype(auto) texturesManager = G.getTexturesManager();
-		decltype(auto) texturesSizes = texturesManager->getTexturesSizes();
-		decltype(auto) settings = G.getSettings();
+	Menu(General& G) :
+		mExitButtonAnimation(pShapes.get()->exitButton,
+			pShapes.get()->exitButtonBackground,
+			pShapes.get()->exitButtonMask,
+			{
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).first,
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second,
+				this->mIndent, // MAYBE BUG
+				G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent)  // MAYBE BUG
+			},
+			G.getTexturesManager()->getExitButton(),
+			mBackgroundButtonsColor,
+			mMaskButtonsColor
+		),
+		mSettingsButtonAnimation(pShapes.get()->settingsButton,
+			pShapes.get()->settingsButtonBackground,
+			pShapes.get()->settingsButtonMask,
+			{
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).first,
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second,
+				this->mIndent, // MAYBE BUG
+				G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons)  // MAYBE BUG
+			},
+			G.getTexturesManager()->getSettingsButton(),
+			mBackgroundButtonsColor,
+			mMaskButtonsColor
+		),
+		mPlayButtonAnimation(pShapes.get()->playButton,
+			pShapes.get()->playButtonBackground,
+			pShapes.get()->playButtonMask,
+			{
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).first,
+				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second,
+				this->mIndent, // MAYBE BUG
+				G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons)  // MAYBE BUG
+			},
+			G.getTexturesManager()->getPlayButton(),
+			mBackgroundButtonsColor,
+			mMaskButtonsColor
+		)
+	{
+		this->mNumberOfMenu = 0;
+		this->mIsMenuInitialazed = false;
 
-		this->numberOfMenu = 0;
-
-		this->playButtonMaskFilled = (float)0;
-		this->settingsButtonMaskFilled = (float)0;
-		this->exitButtonMaskFilled = (float)0;
-
-		initializeShape(
-			this->backgroundImage,
-			settings.getWidthWindow(),
-			settings.getHeightWindow(),
-			0,
-			0,
-			texturesManager->getBackgroundImage() // Какой должен быть размер? SCREEN or WINDOW?
+		initializer::shapeInitialize<int>(
+			this->pShapes.get()->backgroundImage,
+			{ G.getSettings().getWidthWindow(), G.getSettings().getHeightWindow(), 0, 0 },
+			G.getTexturesManager()->getBackgroundImageMenu() // Какой должен быть размер? SCREEN or WINDOW?
 		);
-
-		// =====
-
-		initializeShape(
-			this->exitButton,
-			texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second + this->indent),
-			texturesManager->getExitButton()
-		);
-		initializeShape(
-			this->exitButtonBackground,
-			texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second + this->indent),
-			this->backgroundButtonsColor
-		);
-		initializeShape(
-			this->exitButtonMask,
-			0,
-			texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second + this->indent),
-			this->maskButtonsColor
-		);
-
-		// =====
-
-		initializeShape(
-			this->settingsButton,
-			texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (2 * texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second + this->indent + this->spaceBetweenButtons),
-			texturesManager->getSettingsButton()
-		);
-		initializeShape(
-			this->settingsButtonBackground,
-			texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (2 * texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second + this->indent + this->spaceBetweenButtons),
-			this->backgroundButtonsColor
-		);
-		initializeShape(
-			this->settingsButtonMask,
-			0,
-			texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (2 * texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second + this->indent + this->spaceBetweenButtons),
-			this->maskButtonsColor
-		);
-
-		// =====
-
-		initializeShape(
-			this->playButton,
-			texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (3 * texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second + this->indent + 2 * this->spaceBetweenButtons),
-			texturesManager->getPlayButton()
-		);
-		initializeShape(
-			this->playButtonBackground,
-			texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first,
-			texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (3 * texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second + this->indent + 2 * this->spaceBetweenButtons),
-			this->backgroundButtonsColor
-		);
-		initializeShape(
-			this->playButtonMask,
-			0,
-			texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second,
-			this->indent,
-			settings.getHeightWindow() - (3 * texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second + this->indent + 2 * this->spaceBetweenButtons),
-			this->maskButtonsColor
-		);
-
-		// =====
-
-		this->mouseMiniInformation = { 0, 0, false };
-
-		this->isMouseEnteredExitButton = false;
-		this->isMouseEnteredSettingsButton = false;
-		this->isMouseEnteredPlayButton = false;
-
-		//this->indentForAnimationExitButton = this->indent;
-	}
-
-	void changeMouseMiniInformation(int x, int y, bool isLeftButtonClicked) {
-		this->mouseMiniInformation = { x, y, isLeftButtonClicked };
 	}
 
 	void showMenu(General& G) {
 		decltype(auto) window = G.getWindow();
 
-		decltype(auto) texturesManager = G.getTexturesManager();
-		decltype(auto) texturesSizes = texturesManager->getTexturesSizes();
-		decltype(auto) settings = G.getSettings();
-
-		this->numberOfMenu = 0;
+		bool isShowAnimation = G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing >= this->mAnimationDurationMenuInitializing;
 
 
-		if (!this->isMouseEnteredExitButton) {
-			this->timeForAnimationForwardExitButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
-		if (this->isMouseEnteredExitButton) {
-			this->timeForAnimationBackExitButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
+		// ТУТ ДЕЛАТЬ НОМЕР МЕНЮ 0 
 
-		if (!this->isMouseEnteredSettingsButton) {
-			this->timeForAnimationForwardSettingsButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
-		if (this->isMouseEnteredSettingsButton) {
-			this->timeForAnimationBackSettingsButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
+		bool exitButtonEntered = this->mExitButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
+		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
+		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
 
-		if (!this->isMouseEnteredPlayButton) {
-			this->timeForAnimationForwardPlayButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
-		if (this->isMouseEnteredPlayButton) {
-			this->timeForAnimationBackPlayButton = G.getClock().getElapsedTime().asMilliseconds();
-		}
-
-		// EXIT BUTTON
-
-		if (
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second + this->indent) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first, texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-		) {
-			if (this->isMouseEnteredExitButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationForwardExitButton < this->animationDuration) {
-				this->exitButtonMaskFilled += (float)texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->exitButtonMaskFilled > (float)texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first) {
-					this->exitButtonMaskFilled = (float)texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first;
-				}
-
-				this->exitButtonMask.setSize(
-					sf::Vector2f(
-						this->exitButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second
-					)
-				);
-			}
-
-			this->numberOfMenu = 3;
-
-			this->isMouseEnteredExitButton = true;
-		}
-
-		if (!
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second + this->indent) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first, texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-			) {
-			if (!this->isMouseEnteredExitButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationBackExitButton < this->animationDuration) {
-				this->exitButtonMaskFilled -= (float)texturesSizes.at(paths::textures::menu::EXIT_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->exitButtonMaskFilled < (float)0) {
-					this->exitButtonMaskFilled = (float)0;
-				}
-
-				this->exitButtonMask.setSize(
-					sf::Vector2f(
-						this->exitButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::EXIT_BUTTON).second
-					)
-				);
-			}
-
-			this->isMouseEnteredExitButton = false;
-		}
-
-		// SETTINGS BUTTON
-
-		if (
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (2 * texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second + this->indent + this->spaceBetweenButtons) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first, texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-			) {
-			if (this->isMouseEnteredSettingsButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationForwardSettingsButton < this->animationDuration) {
-				this->settingsButtonMaskFilled += (float)texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->settingsButtonMaskFilled > (float)texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first) {
-					this->settingsButtonMaskFilled = (float)texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first;
-				}
-
-				this->settingsButtonMask.setSize(
-					sf::Vector2f(
-						this->settingsButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second
-					)
-				);
-			}
-
-			this->numberOfMenu = 2;
-
-			this->isMouseEnteredSettingsButton = true;
-		}
-
-		if (!
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (2 * texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second + this->indent + this->spaceBetweenButtons) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first, texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-			) {
-			if (!this->isMouseEnteredSettingsButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationBackSettingsButton < this->animationDuration) {
-				this->settingsButtonMaskFilled -= (float)texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->settingsButtonMaskFilled < (float)0) {
-					this->settingsButtonMaskFilled = (float)0;
-				}
-
-				this->settingsButtonMask.setSize(
-					sf::Vector2f(
-						this->settingsButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::SETTINGS_BUTTON).second
-					)
-				);
-			}
-
-			this->isMouseEnteredSettingsButton = false;
-		}
-
-		// PLAY BUTTON
-
-		if (
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (3 * texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second + this->indent + 2 * this->spaceBetweenButtons) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first, texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-			) {
-			if (this->isMouseEnteredPlayButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationForwardPlayButton < this->animationDuration) {
-				this->playButtonMaskFilled += (float)texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->playButtonMaskFilled > (float)texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first) {
-					this->playButtonMaskFilled = (float)texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first;
-				}
-
-				this->playButtonMask.setSize(
-					sf::Vector2f(
-						this->playButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second
-					)
-				);
-			}
-
-			this->numberOfMenu = 1;
-
-			this->isMouseEnteredPlayButton = true;
-		}
-
-		if (!
-			sf::IntRect(
-				sf::Vector2i( this->indent, settings.getHeightWindow() - (3 * texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second + this->indent + 2 * this->spaceBetweenButtons) ),
-				sf::Vector2i( texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first, texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second )
-			).contains(
-				sf::Vector2i( this->mouseMiniInformation.x, this->mouseMiniInformation.y )
-			)
-			) {
-			if (!this->isMouseEnteredPlayButton && G.getClock().getElapsedTime().asMilliseconds() - this->timeForAnimationBackPlayButton < this->animationDuration) {
-				this->playButtonMaskFilled -= (float)texturesSizes.at(paths::textures::menu::PLAY_BUTTON).first / (float)this->animationDuration;
-
-				// Control pointer of animation
-				if (this->playButtonMaskFilled < (float)0) {
-					this->playButtonMaskFilled = (float)0;
-				}
-
-				this->playButtonMask.setSize(
-					sf::Vector2f(
-						this->playButtonMaskFilled,
-						texturesSizes.at(paths::textures::menu::PLAY_BUTTON).second
-					)
-				);
-			}
-
-			this->isMouseEnteredPlayButton = false;
-		}
-
-		if (this->isMouseEnteredExitButton || this->isMouseEnteredSettingsButton || this->isMouseEnteredPlayButton) {
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
-			window.setMouseCursor(cursor);
+		if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
+			this->mIsShowCursorButtons = true;
 		}
 		else {
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
-			window.setMouseCursor(cursor);
+			this->mIsShowCursorButtons = false;
 		}
 
-		window.draw(backgroundImage);
+		if (exitButtonEntered) this->mNumberOfMenu = 3;
+		if (settingsButtonEntered) {
+			this->mNumberOfMenu = 2;
+			/*G.getSoundsManager()->getEnterElement().setVolume(100);
+			G.getSoundsManager()->getEnterElement().play();*/
+		};
 
-		if (numberOfMenu == 3 && this->mouseMiniInformation.isLeftButtonClicked) {
+		if (playButtonEntered) this->mNumberOfMenu = 1;
+		if (!exitButtonEntered && !settingsButtonEntered && !playButtonEntered) this->mNumberOfMenu = 0;
+
+		if (!this->mIsMenuInitialazed) {
+			this->mTimeForAnimationMenuInitializing = G.getClock().getElapsedTime().asMilliseconds();
+		}
+
+		// HOW I NEED WORK WIN FLOAT AND INT HERE???
+		// ALL PADDINGS IS NORMALY BECAUSE ALL BUTTONS HAS 28PX HEIGHT
+		if (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing <= this->mAnimationDurationMenuInitializing) {
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) },
+				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons))
+			);
+
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) },
+				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons))
+			);
+
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) },
+				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent))
+			);
+
+			this->mIsMenuInitialazed = true;
+		}
+		else {
+			// Конечные значения для кнопок
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) },
+				(float)this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons))
+			);
+
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) },
+				(float)this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons))
+			);
+
+			modshapes::changePosition(
+				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) },
+				(float)this->mIndent,
+				(float)(G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent))
+			);
+		}
+
+
+		window.draw(this->pShapes.get()->backgroundImage);
+
+		if (this->mNumberOfMenu == 3 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
 			window.close();
 		}
 
-		if (numberOfMenu == 1 && this->mouseMiniInformation.isLeftButtonClicked) {
-			window.close();
+		if (this->mNumberOfMenu == 2 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
+			//this->menuSettings.reset(new MenuSettings(G));
+			std::cout << "Settings" << std::endl;
 		}
 
-		if (numberOfMenu == 2 && this->mouseMiniInformation.isLeftButtonClicked) {
-			window.close();
-		} 
+		if (this->mNumberOfMenu == 1 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
+			std::cout << "START GAME" << std::endl;
+		}
 		
-		window.draw(playButtonBackground);
-		window.draw(settingsButtonBackground);
-		window.draw(exitButtonBackground);
+		if (this->pMenuSettings.get() == nullptr) {
+			window.draw(this->pShapes.get()->playButtonBackground);
+			window.draw(this->pShapes.get()->settingsButtonBackground);
+			window.draw(this->pShapes.get()->exitButtonBackground);
 
-		window.draw(playButtonMask);
-		window.draw(settingsButtonMask);
-		window.draw(exitButtonMask);
+			window.draw(this->pShapes.get()->playButtonMask);
+			window.draw(this->pShapes.get()->settingsButtonMask);
+			window.draw(this->pShapes.get()->exitButtonMask);
 
-		window.draw(playButton);
-		window.draw(settingsButton);
-		window.draw(exitButton);
+			window.draw(this->pShapes.get()->playButton);
+			window.draw(this->pShapes.get()->settingsButton);
+			window.draw(this->pShapes.get()->exitButton);
+		}
+		else {
+			//this->pMenuSettings.get()->showMenuSettings(G);
+		}
 	}
 };

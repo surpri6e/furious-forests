@@ -1,31 +1,17 @@
 #pragma once
 #include "../main.hpp"
 
-#include "../Paths.hpp"
-#include "../Constants.hpp"
 #include "../Utils/Wrongs.hpp"
+
+// paths::previousDirectory BUG
 
 namespace fs = std::filesystem;
 
 std::map<std::string, std::string> parceSettings() {
-	std::ofstream write;
-	std::ifstream read;
-
-	// DEBUG MODE
-	if (!fs::exists(paths::previousDirectory + paths::saves::SETTINGS)) {
-		write.open(paths::previousDirectory + paths::saves::SETTINGS);
-
-		if (!write.is_open()) {
-			write.close();
-			Wrongs::add(WRONG_WITH_OPEN_SETTINGS);
-		}
-	}
-
 	// ѕредположим, что никто не имеет доступа к этому файлу, следовательно никто не сможет изменить его не по правилам, следовательно не возникнет лишних ошибок
 	// ѕредположим, что не возникнет никаких ошибок при сохранении файла
 
-	// DEBUG MODE
-	read.open(paths::previousDirectory + paths::saves::SETTINGS);
+	std::ifstream read(paths::previousDirectory + paths::saves::SETTINGS);
 
 	std::string line = "";
 
@@ -35,7 +21,7 @@ std::map<std::string, std::string> parceSettings() {
 		std::string elementOfSettingsInterface = "";
 		std::string valueOfSettingsInterface = "";
 
-		// SLOW ALGORITHM
+		// I THINK SLOW ALGORITHM
 		std::size_t deep = line.find(' ');
 
 		for (std::size_t i = 0; i < deep; i++) {
@@ -50,7 +36,6 @@ std::map<std::string, std::string> parceSettings() {
 	}
 	
 	read.close();
-	write.close();
 
 	return parcedSettings;
 }

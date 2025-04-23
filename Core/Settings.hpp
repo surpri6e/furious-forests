@@ -2,10 +2,9 @@
 #include "../main.hpp"
 
 #include "../Parcers/SettingsParcer.hpp"
-#include "../Constants.hpp"
-#include "../Paths.hpp"
 
-// Вынести в более общее место
+// paths::previousDirectory BUG
+
 enum PlayerGender {
 	MALE,
 	FEMALE
@@ -22,104 +21,100 @@ struct SettingsInterface {
 
 class Settings {
 private:
-	SettingsInterface currentSettingsInterface;
-	SettingsInterface defaultSettingsInterface;
+	SettingsInterface mCurrentSettingsInterface;
+	// На будущее, когда буду обрабатывать ошибки записи-чтения файлов
+	SettingsInterface mDefaultSettingsInterface;
 public:
 	Settings() {
-		this->defaultSettingsInterface.framerateLimit = std::make_pair("framerateLimit", 60); // Нужно ли выносить во внешние константы?
-		this->defaultSettingsInterface.heightWindow = std::make_pair("heightWindow", consts::HEIGHT_SCREEN); 
-		this->defaultSettingsInterface.widthWindow = std::make_pair("widthWindow", consts::WIDTH_SCREEN);
-		this->defaultSettingsInterface.isBackgroundMusicPlaying = std::make_pair("isBackgroundMusicPlaying", true); // Нужно ли выносить во внешние константы?
-		this->defaultSettingsInterface.isWindowFullscreen = std::make_pair("isWindowFullscreen", true); // Нужно ли выносить во внешние константы?
-		this->defaultSettingsInterface.playerGender = std::make_pair("playerGender", MALE); // Нужно ли выносить во внешние константы?
+		this->mDefaultSettingsInterface.framerateLimit = std::make_pair("framerateLimit", 60); 
+		this->mDefaultSettingsInterface.heightWindow = std::make_pair("heightWindow", consts::HEIGHT_SCREEN); 
+		this->mDefaultSettingsInterface.widthWindow = std::make_pair("widthWindow", consts::WIDTH_SCREEN);
+		this->mDefaultSettingsInterface.isBackgroundMusicPlaying = std::make_pair("isBackgroundMusicPlaying", true); 
+		this->mDefaultSettingsInterface.isWindowFullscreen = std::make_pair("isWindowFullscreen", true); 
+		this->mDefaultSettingsInterface.playerGender = std::make_pair("playerGender", MALE);
 
 		auto parcedSettings = parceSettings();
 
-		this->currentSettingsInterface = this->defaultSettingsInterface;
+		this->mCurrentSettingsInterface = this->mDefaultSettingsInterface;
 
 		if (parcedSettings.empty()) {
 			this->save();
 		}
 		else {
-			this->currentSettingsInterface.framerateLimit.second = std::stoi(parcedSettings[this->currentSettingsInterface.framerateLimit.first]);
-			this->currentSettingsInterface.heightWindow.second = std::stoi(parcedSettings[this->currentSettingsInterface.heightWindow.first]);
-			this->currentSettingsInterface.widthWindow.second = std::stoi(parcedSettings[this->currentSettingsInterface.widthWindow.first]);
-			this->currentSettingsInterface.isBackgroundMusicPlaying.second = (bool)std::stoi(parcedSettings[this->currentSettingsInterface.isBackgroundMusicPlaying.first]);
-			this->currentSettingsInterface.isWindowFullscreen.second = (bool)std::stoi(parcedSettings[this->currentSettingsInterface.isWindowFullscreen.first]);
-			this->currentSettingsInterface.playerGender.second = (PlayerGender)std::stoi(parcedSettings[this->currentSettingsInterface.playerGender.first]);
+			this->mCurrentSettingsInterface.framerateLimit.second = std::stoi(parcedSettings[this->mCurrentSettingsInterface.framerateLimit.first]);
+			this->mCurrentSettingsInterface.heightWindow.second = std::stoi(parcedSettings[this->mCurrentSettingsInterface.heightWindow.first]);
+			this->mCurrentSettingsInterface.widthWindow.second = std::stoi(parcedSettings[this->mCurrentSettingsInterface.widthWindow.first]);
+			this->mCurrentSettingsInterface.isBackgroundMusicPlaying.second = (bool)std::stoi(parcedSettings[this->mCurrentSettingsInterface.isBackgroundMusicPlaying.first]);
+			this->mCurrentSettingsInterface.isWindowFullscreen.second = (bool)std::stoi(parcedSettings[this->mCurrentSettingsInterface.isWindowFullscreen.first]);
+			this->mCurrentSettingsInterface.playerGender.second = (PlayerGender)std::stoi(parcedSettings[this->mCurrentSettingsInterface.playerGender.first]);
 		}
 	};
 
 	void save() {
-		// DEBUG MODE
+		// Функция гарантирует, что файл будет находиться в нужной директории и существовать
+
 		std::ofstream write(paths::previousDirectory + paths::saves::SETTINGS, std::ios::out);
 
-		// Функция гарантирует, что файл будет находиться в нужной директории и существовать
 		if (!write.is_open()) {
+			// Обработку закрытия каналов и прочего делать непосредственно в Wrongs
 			write.close();
 			Wrongs::add(WRONG_WITH_SAVE_SETTINGS);
 		}
 		else {
-			write << this->currentSettingsInterface.framerateLimit.first << " " << this->currentSettingsInterface.framerateLimit.second << std::endl;
-			write << this->currentSettingsInterface.heightWindow.first << " " << this->currentSettingsInterface.heightWindow.second << std::endl;
-			write << this->currentSettingsInterface.widthWindow.first << " " << this->currentSettingsInterface.widthWindow.second << std::endl;
-			write << this->currentSettingsInterface.isBackgroundMusicPlaying.first << " " << this->currentSettingsInterface.isBackgroundMusicPlaying.second << std::endl;
-			write << this->currentSettingsInterface.isWindowFullscreen.first << " " << this->currentSettingsInterface.isWindowFullscreen.second << std::endl;
-			write << this->currentSettingsInterface.playerGender.first << " " << this->currentSettingsInterface.playerGender.second << std::endl;
+			write << this->mCurrentSettingsInterface.framerateLimit.first << " " << this->mCurrentSettingsInterface.framerateLimit.second << std::endl;
+			write << this->mCurrentSettingsInterface.heightWindow.first << " " << this->mCurrentSettingsInterface.heightWindow.second << std::endl;
+			write << this->mCurrentSettingsInterface.widthWindow.first << " " << this->mCurrentSettingsInterface.widthWindow.second << std::endl;
+			write << this->mCurrentSettingsInterface.isBackgroundMusicPlaying.first << " " << this->mCurrentSettingsInterface.isBackgroundMusicPlaying.second << std::endl;
+			write << this->mCurrentSettingsInterface.isWindowFullscreen.first << " " << this->mCurrentSettingsInterface.isWindowFullscreen.second << std::endl;
+			write << this->mCurrentSettingsInterface.playerGender.first << " " << this->mCurrentSettingsInterface.playerGender.second << std::endl;
 		}
 
 		write.close();
 	}
 
 	const SettingsInterface& getDefaultSettingsInterface() {
-		return this->defaultSettingsInterface;
+		return this->mDefaultSettingsInterface;
 	}
 
 	void setFramerateLimit(const int framerateLimit) {
-		this->currentSettingsInterface.framerateLimit.second = framerateLimit;
+		this->mCurrentSettingsInterface.framerateLimit.second = framerateLimit;
 	}
-
 	const int getFramerateLimit() {
-		return this->currentSettingsInterface.framerateLimit.second;
+		return this->mCurrentSettingsInterface.framerateLimit.second;
 	}
 
 	void setWidthWindow(const int widthWindow) {
-		this->currentSettingsInterface.widthWindow.second = widthWindow;
+		this->mCurrentSettingsInterface.widthWindow.second = widthWindow;
 	}
-
 	const int getWidthWindow() {
-		return this->currentSettingsInterface.widthWindow.second;
+		return this->mCurrentSettingsInterface.widthWindow.second;
 	}
 
 	void setHeightWindow(const int heightWindow) {
-		this->currentSettingsInterface.heightWindow.second = heightWindow;
+		this->mCurrentSettingsInterface.heightWindow.second = heightWindow;
 	}
-
 	const int getHeightWindow() {
-		return this->currentSettingsInterface.heightWindow.second;
+		return this->mCurrentSettingsInterface.heightWindow.second;
 	}
 
 	void setIsBackgroundMusicPlaying(const bool isBackgroundMusicPlaying) {
-		this->currentSettingsInterface.isBackgroundMusicPlaying.second = isBackgroundMusicPlaying;
+		this->mCurrentSettingsInterface.isBackgroundMusicPlaying.second = isBackgroundMusicPlaying;
 	}
-
 	const bool getIsBackgroundMusicPlaying() {
-		return this->currentSettingsInterface.isBackgroundMusicPlaying.second;
+		return this->mCurrentSettingsInterface.isBackgroundMusicPlaying.second;
 	}
 
 	void setIsWindowFullscreen(const bool isWindowFullscreen) {
-		this->currentSettingsInterface.isWindowFullscreen.second = isWindowFullscreen;
+		this->mCurrentSettingsInterface.isWindowFullscreen.second = isWindowFullscreen;
 	}
-
 	const bool getIsWindowFullscreen() {
-		return this->currentSettingsInterface.isWindowFullscreen.second;
+		return this->mCurrentSettingsInterface.isWindowFullscreen.second;
 	}
 
 	void setPlayerGender(const PlayerGender& playerGender) {
-		this->currentSettingsInterface.playerGender.second = playerGender;
+		this->mCurrentSettingsInterface.playerGender.second = playerGender;
 	}
-
 	const PlayerGender& getPlayerGender() {
-		return this->currentSettingsInterface.playerGender.second;
+		return this->mCurrentSettingsInterface.playerGender.second;
 	}
 };

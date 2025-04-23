@@ -1,120 +1,127 @@
 #pragma once 
 #include "../main.hpp"
 
-#include "../Paths.hpp"
-#include "../Constants.hpp"
-#include "../Utils/Wrongs.hpp"
+#include "../Utils/Initializer.hpp"
 #include "../Parcers/TexturesSizesParcer.hpp"
 
-void textureInitialize(sf::Texture& texture, const std::string& pathToTexture) {
-	if (!texture.loadFromFile(pathToTexture)) {
-		Wrongs::add(WRONG_WITH_INITIALIZE_TEXTURE);
-	}
-	else {
-		std::cout << consts::others::DIVIDING_LINE << " TEXTURE INITIALIZE CORRECT " << consts::others::DIVIDING_LINE << std::endl;
-	}
-}
+// paths::previousDirectory BUG
 
 class TexturesManager {
 private:
-	std::map<std::string, std::pair<int, int>> texturesSizes;
+	std::map<std::string, std::pair<int, int>> mTexturesSizes;
 
 	// HEROS
-	sf::Texture merchantHero;
+	sf::Texture mMerchantHero;
 
 	// PLAYERS
-	sf::Texture malePlayer;
-	sf::Texture femalePlayer;
+	sf::Texture mMalePlayer;
+	sf::Texture mFemalePlayer;
 
 	// TREES
-	sf::Texture smallDarkTree;
-	sf::Texture bigDarkTree;
-	sf::Texture bigLightTree;
+	sf::Texture mSmallDarkTree;
+	sf::Texture mBigDarkTree;
+	sf::Texture mBigLightTree;
 
 	// CLOUDS 
-	sf::Texture smallCloud;
+	sf::Texture mSmallCloud;
 
 	// ROCKS
-	sf::Texture standartRock;
+	sf::Texture mStandartRock;
 
 	// GRASS 
-	sf::Texture lightGrass;
+	sf::Texture mLightGrass;
 
 	// HUD
-	sf::Texture xpBorder;
-	sf::Texture xpInside;
+	sf::Texture mXpBorder;
+	sf::Texture mXpInside;
 
 	// ICONS
-	sf::Texture checkboxFalse;
-	sf::Texture checkboxTrue;
-	sf::Texture coin;
+	sf::Texture mCheckboxFalse;
+	sf::Texture mCheckboxTrue;
+	sf::Texture mCoin;
+
+	// BUTTONS
+	sf::Texture mPlayButton;
+	sf::Texture mExitButton;
+	sf::Texture mSettingsButton;
 
 	// MENU 
-	sf::Texture playButton;
-	sf::Texture exitButton;
-	sf::Texture settingsButton;
-	sf::Texture backgroundImage;
+	sf::Texture mBackgroundImageMenu;
+	sf::Texture mSettingsBorderMenu;
 public:
 	// Initialize all textures  
 	TexturesManager() {
-		// DEBUG MODE ALL
-		
 		// HEROS
-		textureInitialize(this->merchantHero, paths::previousDirectory + paths::textures::heros::MERCHANT_HERO);
+		initializer::textureInitialize(this->mMerchantHero, paths::previousDirectory + paths::textures::heros::MERCHANT_HERO);
 
 		// PLAYERS
-		textureInitialize(this->malePlayer, paths::previousDirectory + paths::textures::players::MALE_PLAYER);
-		textureInitialize(this->femalePlayer, paths::previousDirectory + paths::textures::players::FEMALE_PLAYER);
+		initializer::textureInitialize(this->mMalePlayer, paths::previousDirectory + paths::textures::players::MALE_PLAYER);
+		initializer::textureInitialize(this->mFemalePlayer, paths::previousDirectory + paths::textures::players::FEMALE_PLAYER);
 
 		// TREES
-		textureInitialize(this->smallDarkTree, paths::previousDirectory + paths::textures::trees::SMALL_DARK_TREE);
-		textureInitialize(this->bigDarkTree, paths::previousDirectory + paths::textures::trees::BIG_DARK_TREE);
-		textureInitialize(this->bigLightTree, paths::previousDirectory + paths::textures::trees::BIG_LIGHT_TREE);
+		initializer::textureInitialize(this->mSmallDarkTree, paths::previousDirectory + paths::textures::trees::SMALL_DARK_TREE);
+		initializer::textureInitialize(this->mBigDarkTree, paths::previousDirectory + paths::textures::trees::BIG_DARK_TREE);
+		initializer::textureInitialize(this->mBigLightTree, paths::previousDirectory + paths::textures::trees::BIG_LIGHT_TREE);
 
 		// CLOUDS 
-		textureInitialize(this->smallCloud, paths::previousDirectory + paths::textures::clouds::SMALL_CLOUD);
+		initializer::textureInitialize(this->mSmallCloud, paths::previousDirectory + paths::textures::clouds::SMALL_CLOUD);
 
 		// ROCKS
-		textureInitialize(this->standartRock, paths::previousDirectory + paths::textures::rocks::STANDART_ROCK);
+		initializer::textureInitialize(this->mStandartRock, paths::previousDirectory + paths::textures::rocks::STANDART_ROCK);
 
 		// GRASS 
-		textureInitialize(this->lightGrass, paths::previousDirectory + paths::textures::grass::LIGHT_GRASS);
+		initializer::textureInitialize(this->mLightGrass, paths::previousDirectory + paths::textures::grass::LIGHT_GRASS);
 
 		// HUD
-		textureInitialize(this->xpBorder, paths::previousDirectory + paths::textures::hud::XP_BORDER);
-		textureInitialize(this->xpInside, paths::previousDirectory + paths::textures::hud::XP_INSIDE);
+		initializer::textureInitialize(this->mXpBorder, paths::previousDirectory + paths::textures::hud::XP_BORDER);
+		initializer::textureInitialize(this->mXpInside, paths::previousDirectory + paths::textures::hud::XP_INSIDE);
 
 		// ICONS
-		textureInitialize(this->checkboxFalse, paths::previousDirectory + paths::textures::icons::CHECKBOX_FALSE);
-		textureInitialize(this->checkboxTrue, paths::previousDirectory + paths::textures::icons::CHECKBOX_TRUE);
-		textureInitialize(this->coin, paths::previousDirectory + paths::textures::icons::COIN);
+		initializer::textureInitialize(this->mCheckboxFalse, paths::previousDirectory + paths::textures::icons::CHECKBOX_FALSE);
+		initializer::textureInitialize(this->mCheckboxTrue, paths::previousDirectory + paths::textures::icons::CHECKBOX_TRUE);
+		initializer::textureInitialize(this->mCoin, paths::previousDirectory + paths::textures::icons::COIN);
+
+		// BUTTONS
+		initializer::textureInitialize(this->mPlayButton, paths::previousDirectory + paths::textures::buttons::PLAY_BUTTON);
+		initializer::textureInitialize(this->mExitButton, paths::previousDirectory + paths::textures::buttons::EXIT_BUTTON);
+		initializer::textureInitialize(this->mSettingsButton, paths::previousDirectory + paths::textures::buttons::SETTINGS_BUTTON);
 
 		// MENU 
-		textureInitialize(this->playButton, paths::previousDirectory + paths::textures::menu::PLAY_BUTTON);
-		textureInitialize(this->exitButton, paths::previousDirectory + paths::textures::menu::EXIT_BUTTON);
-		textureInitialize(this->settingsButton, paths::previousDirectory + paths::textures::menu::SETTINGS_BUTTON);
-		textureInitialize(this->backgroundImage, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE);
+		initializer::textureInitialize(this->mBackgroundImageMenu, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE_MENU);
+		initializer::textureInitialize(this->mSettingsBorderMenu, paths::previousDirectory + paths::textures::menu::SETTINGS_BORDER_MENU);
 
-		this->texturesSizes = parceTexturesSizes();
+		this->mTexturesSizes = parceTexturesSizes();
 	}
 
 	const std::map<std::string, std::pair<int, int>>& getTexturesSizes() const {
-		return this->texturesSizes;
+		return this->mTexturesSizes;
 	}
 
-	const sf::Texture& getBackgroundImage() const {
-		return this->backgroundImage;
+	const sf::Texture& getCheckboxFalse() const {
+		return this->mCheckboxFalse;
+	}
+
+	const sf::Texture& getCheckboxTrue() const {
+		return this->mCheckboxTrue;
+	}
+
+	const sf::Texture& getSettingsBorderMenu() const {
+		return this->mSettingsBorderMenu;
+	}
+
+	const sf::Texture& getBackgroundImageMenu() const {
+		return this->mBackgroundImageMenu;
 	}
 
 	const sf::Texture& getPlayButton() const {
-		return this->playButton;
+		return this->mPlayButton;
 	}
 
 	const sf::Texture& getExitButton() const {
-		return this->exitButton;
+		return this->mExitButton;
 	}
 
 	const sf::Texture& getSettingsButton() const {
-		return this->settingsButton;
+		return this->mSettingsButton;
 	}
 };

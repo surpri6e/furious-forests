@@ -1,20 +1,18 @@
 #pragma once
 #include "../main.hpp"
 
-#include "../Paths.hpp"
+// paths::previousDirectory BUG
 
 std::map<std::string, std::pair<int, int>> parceTexturesSizes() {
 	// ѕредположим, что никто не имеет доступа к этому файлу, следовательно никто не сможет изменить его не по правилам, следовательно не возникнет лишних ошибок
 	// ѕредположим, что не возникнет никаких ошибок при сохранении файла
 
-	// DEBUG MODE
 	std::ifstream read(paths::previousDirectory + paths::textures::sizes);
 
 	std::string line = "";
 
 	std::map<std::string, std::pair<int, int>> parcedTexturesSizes;
 
-	
 	while (std::getline(read, line)) {
 		std::string pathToTexture = "";
 
@@ -23,7 +21,7 @@ std::map<std::string, std::pair<int, int>> parceTexturesSizes() {
 		std::string width = "";
 		std::string height = "";
 
-		// SLOW ALGORITHM
+		// I THINK SLOW ALGORITHM
 		std::size_t firstDeep = line.find(' ');
 
 		for (std::size_t i = 0; i < firstDeep; i++) {
@@ -52,7 +50,6 @@ std::map<std::string, std::pair<int, int>> parceTexturesSizes() {
 		);
 	}
 	
-
 	read.close();
 
 	return parcedTexturesSizes;

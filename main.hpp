@@ -12,4 +12,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+#include "Paths.hpp"
+#include "Constants.hpp"
 

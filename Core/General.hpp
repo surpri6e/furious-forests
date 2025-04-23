@@ -2,39 +2,55 @@
 #include "../main.hpp"
 
 #include "../Managers/TexturesManager.hpp"
+#include "../Managers/FontsManager.hpp"
+#include "../Managers/SoundsManager.hpp"
 #include "Settings.hpp"
+#include "InputsObserver.hpp"
 
 class General {
 private:
-	const std::unique_ptr<const TexturesManager> texturesManager = std::make_unique<TexturesManager>(TexturesManager());
+	const std::unique_ptr<const TexturesManager> pTexturesManager = std::make_unique<TexturesManager>(TexturesManager());
+	const std::unique_ptr<const FontsManager> pFontsManager = std::make_unique<FontsManager>(FontsManager());
+	const std::unique_ptr<SoundsManager> pSoundsManager = std::make_unique<SoundsManager>(SoundsManager()); //SoundsBuffersManager()
 
-	sf::RenderWindow& window;
-	sf::Clock clock;
-	sf::View camera;
+	Settings& mSettings;
+	InputsObserver& mInputsObserver;
 
-	Settings& settings;
+	sf::RenderWindow& mWindow;
+	sf::Clock mClock;
+	sf::View mCamera;
 public:
-	General(sf::RenderWindow& window, Settings& settings) : window(window), settings(settings) {
-		
-	}
+	General(sf::RenderWindow& window, Settings& settings, InputsObserver& inputsObserver) : mWindow(window), mSettings(settings), mInputsObserver(inputsObserver) {}
 
 	sf::View& getCamera() {
-		return this->camera;
+		return this->mCamera;
 	}
 
 	sf::Clock& getClock() {
-		return this->clock;
+		return this->mClock;
 	}
 
 	sf::RenderWindow& getWindow() {
-		return this->window;
+		return this->mWindow;
 	}
 
 	Settings& getSettings() {
-		return this->settings;
+		return this->mSettings;
+	}
+
+	InputsObserver& getInputsObserver() {
+		return this->mInputsObserver;
+	}
+
+	SoundsManager* getSoundsManager() {
+		return this->pSoundsManager.get();
 	}
 
 	const TexturesManager* getTexturesManager() {
-		return this->texturesManager.get();
+		return this->pTexturesManager.get();
+	}
+
+	const FontsManager* getFontsManager() {
+		return this->pFontsManager.get();
 	}
 };

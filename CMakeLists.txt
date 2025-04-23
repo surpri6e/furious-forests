@@ -14,6 +14,7 @@ add_executable (furious-forests
 	"Constants.hpp"
 	"Managers/TexturesManager.hpp"
 	"Menu/Menu.hpp"
+	"Menu/MenuSettings.hpp"
 	"Core/General.hpp"
 	"Core/Settings.hpp"
 	"Parcers/SettingsParcer.hpp"
