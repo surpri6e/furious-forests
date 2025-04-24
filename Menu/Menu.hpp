@@ -51,6 +51,9 @@ private:
 
 	// можно просто в функцию вынести, зачем оно тут?
 	bool mIsShowCursorButtons;
+	bool isAnyButtonEntered;
+
+	sf::Sound sound;
 public:
 	Menu(General& G) :
 		mExitButtonAnimation(pShapes.get()->exitButton,
@@ -91,7 +94,8 @@ public:
 			G.getTexturesManager()->getPlayButton(),
 			mBackgroundButtonsColor,
 			mMaskButtonsColor
-		)
+		),
+		sound(G.getSoundsManager()->getEnterElement())
 	{
 		this->mNumberOfMenu = 0;
 		this->mIsMenuInitialazed = false;
@@ -101,6 +105,8 @@ public:
 			{ G.getSettings().getWidthWindow(), G.getSettings().getHeightWindow(), 0, 0 },
 			G.getTexturesManager()->getBackgroundImageMenu() // Какой должен быть размер? SCREEN or WINDOW?
 		);
+
+		this->isAnyButtonEntered = false;
 	}
 
 	void showMenu(General& G) {
@@ -111,24 +117,37 @@ public:
 
 		// ТУТ ДЕЛАТЬ НОМЕР МЕНЮ 0 
 
-		bool exitButtonEntered = this->mExitButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
-		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
-		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation);
+		bool exitButtonEntered = this->mExitButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
+		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
+		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
 
 		if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
 			this->mIsShowCursorButtons = true;
+
+			if (!this->isAnyButtonEntered) {
+				this->isAnyButtonEntered = true;
+				
+				//if (sound.getStatus() != sf::SoundSource::Status::Playing) {
+				this->sound.play();
+				//	std::cout << "Sound is playing." << std::endl; // Логирование
+				//}
+			}
 		}
 		else {
 			this->mIsShowCursorButtons = false;
+			this->isAnyButtonEntered = false;
 		}
+
+		//if (sound.getStatus() != sf::SoundSource::Status::Playing) {
+		//	sound.play();
+		//	std::cout << "Sound is playing." << std::endl; // Логирование
+		//}
 
 		if (exitButtonEntered) this->mNumberOfMenu = 3;
 		if (settingsButtonEntered) {
 			this->mNumberOfMenu = 2;
-			/*G.getSoundsManager()->getEnterElement().setVolume(100);
-			G.getSoundsManager()->getEnterElement().play();*/
+			///
 		};
-
 		if (playButtonEntered) this->mNumberOfMenu = 1;
 		if (!exitButtonEntered && !settingsButtonEntered && !playButtonEntered) this->mNumberOfMenu = 0;
 
@@ -188,7 +207,7 @@ public:
 		}
 
 		if (this->mNumberOfMenu == 2 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
-			//this->menuSettings.reset(new MenuSettings(G));
+			this->pMenuSettings.reset(new MenuSettings(G));
 			std::cout << "Settings" << std::endl;
 		}
 
@@ -210,7 +229,7 @@ public:
 			window.draw(this->pShapes.get()->exitButton);
 		}
 		else {
-			//this->pMenuSettings.get()->showMenuSettings(G);
+			this->pMenuSettings.get()->showMenuSettings(G);
 		}
 	}
 };

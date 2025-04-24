@@ -35,7 +35,7 @@ public:
 		const sf::Texture& texture,
 		const sf::Color& backgroundButtonColor,
 		const sf::Color& maskButtonColor,
-		const std::uint32_t animationDuration = 400
+		const std::uint32_t animationDuration = 200
 	) :	
 		mElement(element), 
 		mElementBackground(elementBackground), 
@@ -72,6 +72,8 @@ public:
 
 	// HOW I NEED WORK WIN FLOAT AND INT HERE???
 	bool showAnimation(General& G, const bool isShowCursor, const bool isShow = true) {
+
+		//isShowCursor онкмюъ айеяонкегмнярэ!!!!
 		if (!isShow) return false;
 
 		if (isShowCursor) {

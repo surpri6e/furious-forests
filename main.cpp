@@ -20,19 +20,6 @@ int main() {
 
     auto menu = std::make_unique<Menu>(Menu(G));
 
-   /* G.getSoundsManager()->getEnterElement().setVolume(100.f);
-    G.getSoundsManager()->getEnterElement().play();*/
-
-    sf::SoundBuffer b;
-
-    initializer::soundBufferInitialize(b, paths::previousDirectory + paths::sounds::ENTER_ELEMENT);
-
-    sf::Sound s(b);
-
-    s.setLooping(true);
-    s.setVolume(100.f);
-    s.play();
-
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {

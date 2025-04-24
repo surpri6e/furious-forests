@@ -1,6 +1,6 @@
 framerateLimit 60
 heightWindow 1080
 widthWindow 1920
-isBackgroundMusicPlaying 1
+isBackgroundMusicPlaying 0
 isWindowFullscreen 1
 playerGender 0

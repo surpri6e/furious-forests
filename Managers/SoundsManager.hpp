@@ -5,40 +5,40 @@
 
 // paths::previousDirectory BUG
 
-//class SoundsBuffersManager {
-//private:
-//	sf::SoundBuffer mEnterElementBuffer;
-//	sf::SoundBuffer mWalkGrassBuffer;
-//public:
-//	SoundsBuffersManager() {
-//		initializer::soundBufferInitialize(mEnterElementBuffer, paths::previousDirectory + paths::sounds::ENTER_ELEMENT);
-//		initializer::soundBufferInitialize(mWalkGrassBuffer, paths::previousDirectory + paths::sounds::WALK_GRASS);
-//	}
-//
-//	const sf::SoundBuffer& getEnterElementBuffer() const {
-//		return this->mEnterElementBuffer;
-//	}
-//
-//	const sf::SoundBuffer& getWalkGrassBuffer() const {
-//		return this->mWalkGrassBuffer;
-//	}
-//};
+class SoundsBuffersManager {
+private:
+	sf::SoundBuffer mEnterElementBuffer;
+	sf::SoundBuffer mWalkGrassBuffer;
+public:
+	SoundsBuffersManager() {
+		initializer::soundBufferInitialize(mEnterElementBuffer, paths::previousDirectory + paths::sounds::ENTER_ELEMENT);
+		initializer::soundBufferInitialize(mWalkGrassBuffer, paths::previousDirectory + paths::sounds::WALK_GRASS);
+	}
+
+	const sf::SoundBuffer& getEnterElementBuffer() const {
+		return this->mEnterElementBuffer;
+	}
+
+	const sf::SoundBuffer& getWalkGrassBuffer() const {
+		return this->mWalkGrassBuffer;
+	}
+};
 
 class SoundsManager {
 private:
-	/*sf::Sound mEnterElement;
-	sf::Sound mWalkGrass;*/
-	sf::SoundBuffer mEnterElementBuffer;
+	sf::Sound mEnterElement;
+	sf::Sound mWalkGrass;
 public:
-	SoundsManager() { // const SoundsBuffersManager& soundsBuffersManager : mEnterElement(soundsBuffersManager.getEnterElementBuffer()), mWalkGrass(soundsBuffersManager.getWalkGrassBuffer()) {
-		initializer::soundBufferInitialize(mEnterElementBuffer, paths::previousDirectory + paths::sounds::ENTER_ELEMENT);
+	SoundsManager(const SoundsBuffersManager* soundsBuffersManager) : mEnterElement(soundsBuffersManager->getEnterElementBuffer()), mWalkGrass(soundsBuffersManager->getWalkGrassBuffer()) {
+		this->mEnterElement.setVolume(100.f);
+		this->mWalkGrass.setVolume(100.f);
 	}
 
 	sf::Sound getEnterElement() {
-		return sf::Sound(this->mEnterElementBuffer);
+		return this->mEnterElement;
 	}
 
-	//sf::Sound& getWalkGrass() {
-	//	return this->mWalkGrass;
-	//}
+	sf::Sound& getWalkGrass() {
+		return this->mWalkGrass;
+	}
 };

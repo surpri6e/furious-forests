@@ -11,7 +11,9 @@ class General {
 private:
 	const std::unique_ptr<const TexturesManager> pTexturesManager = std::make_unique<TexturesManager>(TexturesManager());
 	const std::unique_ptr<const FontsManager> pFontsManager = std::make_unique<FontsManager>(FontsManager());
-	const std::unique_ptr<SoundsManager> pSoundsManager = std::make_unique<SoundsManager>(SoundsManager()); //SoundsBuffersManager()
+
+	const std::unique_ptr<const SoundsBuffersManager> pSoundsBuffersManager = std::make_unique<SoundsBuffersManager>(SoundsBuffersManager());
+	const std::unique_ptr<SoundsManager> pSoundsManager = std::make_unique<SoundsManager>(SoundsManager(pSoundsBuffersManager.get()));
 
 	Settings& mSettings;
 	InputsObserver& mInputsObserver;
