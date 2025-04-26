@@ -7,9 +7,6 @@
 #include "MenuSettings.hpp"
 #include "../Utils/ModifyShapes.hpp"
 
-
-// Для анимации при старте меню, когда нужно будет двигат сразу 3 спрайта сделать функцию основанную на reference_wrapper
-
 // GOOD PRACTICE
 struct MenuShapes {
 	sf::RectangleShape backgroundImage;
@@ -36,169 +33,159 @@ private:
 	const sf::Color mMaskButtonsColor = sf::Color(53, 98, 13, 0.4 * 255);
 
 	std::unique_ptr<MenuSettings> pMenuSettings = nullptr;
-
 	std::unique_ptr<MenuShapes> pShapes = std::make_unique<MenuShapes>();
+
+	const int mPosYExitButton;
+	const int mPosYSettingsButton;
+	const int mPosYPlayButton;
 
 	AnimationFiller mExitButtonAnimation;
 	AnimationFiller mSettingsButtonAnimation;
 	AnimationFiller mPlayButtonAnimation;
 
+	sf::Sound& mEnteredElementSound;
+	bool mIsPlayingSound;
+
 	int mNumberOfMenu;
 
-	bool mIsMenuInitialazed;
-	const std::uint32_t mAnimationDurationMenuInitializing = 500;
+	bool mIsTimeForMenuInitializingElapsed;
+	const std::uint32_t mAnimationDurationMenuInitializing = 800;
 	std::uint32_t mTimeForAnimationMenuInitializing;
-
-	// можно просто в функцию вынести, зачем оно тут?
-	bool mIsShowCursorButtons;
-	bool isAnyButtonEntered;
-
-	sf::Sound sound;
 public:
 	Menu(General& G) :
-		mExitButtonAnimation(pShapes.get()->exitButton,
-			pShapes.get()->exitButtonBackground,
-			pShapes.get()->exitButtonMask,
+		// ALL PADDINGS IS NORMALY BECAUSE ALL BUTTONS HAS 28PX HEIGHT
+		mPosYExitButton(G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + this->mIndent)),
+		mPosYSettingsButton(G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons)),
+		mPosYPlayButton(G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons)),
+		mExitButtonAnimation(
+			this->pShapes.get()->exitButton,
+			this->pShapes.get()->exitButtonBackground,
+			this->pShapes.get()->exitButtonMask,
 			{
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).first,
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second,
 				this->mIndent, // MAYBE BUG
-				G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent)  // MAYBE BUG
+				this->mPosYExitButton  // MAYBE BUG
 			},
 			G.getTexturesManager()->getExitButton(),
-			mBackgroundButtonsColor,
-			mMaskButtonsColor
+			this->mBackgroundButtonsColor,
+			this->mMaskButtonsColor
 		),
-		mSettingsButtonAnimation(pShapes.get()->settingsButton,
-			pShapes.get()->settingsButtonBackground,
-			pShapes.get()->settingsButtonMask,
+		mSettingsButtonAnimation(
+			this->pShapes.get()->settingsButton,
+			this->pShapes.get()->settingsButtonBackground,
+			this->pShapes.get()->settingsButtonMask,
 			{
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).first,
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second,
 				this->mIndent, // MAYBE BUG
-				G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons)  // MAYBE BUG
+				this->mPosYSettingsButton  // MAYBE BUG
 			},
 			G.getTexturesManager()->getSettingsButton(),
-			mBackgroundButtonsColor,
-			mMaskButtonsColor
+			this->mBackgroundButtonsColor,
+			this->mMaskButtonsColor
 		),
-		mPlayButtonAnimation(pShapes.get()->playButton,
-			pShapes.get()->playButtonBackground,
-			pShapes.get()->playButtonMask,
+		mPlayButtonAnimation(
+			this->pShapes.get()->playButton,
+			this->pShapes.get()->playButtonBackground,
+			this->pShapes.get()->playButtonMask,
 			{
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).first,
 				G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second,
 				this->mIndent, // MAYBE BUG
-				G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons)  // MAYBE BUG
+				this->mPosYPlayButton  // MAYBE BUG
 			},
 			G.getTexturesManager()->getPlayButton(),
-			mBackgroundButtonsColor,
-			mMaskButtonsColor
+			this->mBackgroundButtonsColor,
+			this->mMaskButtonsColor
 		),
-		sound(G.getSoundsManager()->getEnterElement())
+		mEnteredElementSound(G.getSoundsManager()->getEnterElement())
 	{
 		this->mNumberOfMenu = 0;
-		this->mIsMenuInitialazed = false;
+		this->mIsPlayingSound = false;
+		this->mIsTimeForMenuInitializingElapsed = false;
+
+		this->mTimeForAnimationMenuInitializing = 0;
 
 		initializer::shapeInitialize<int>(
 			this->pShapes.get()->backgroundImage,
-			{ G.getSettings().getWidthWindow(), G.getSettings().getHeightWindow(), 0, 0 },
-			G.getTexturesManager()->getBackgroundImageMenu() // Какой должен быть размер? SCREEN or WINDOW?
+			{ G.getSettings().getWidthWindow(), G.getSettings().getHeightWindow(), 0, 0 }, // Какой должен быть размер? SCREEN or WINDOW?
+			G.getTexturesManager()->getBackgroundImageMenu() 
 		);
-
-		this->isAnyButtonEntered = false;
 	}
 
-	void showMenu(General& G) {
+	void show(General& G) {
 		decltype(auto) window = G.getWindow();
 
-		bool isShowAnimation = G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing >= this->mAnimationDurationMenuInitializing;
-
-
-		// ТУТ ДЕЛАТЬ НОМЕР МЕНЮ 0 
-
-		bool exitButtonEntered = this->mExitButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
-		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
-		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, this->mIsShowCursorButtons, isShowAnimation && this->pMenuSettings.get() == nullptr);
-
-		if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
-			this->mIsShowCursorButtons = true;
-
-			if (!this->isAnyButtonEntered) {
-				this->isAnyButtonEntered = true;
-				
-				//if (sound.getStatus() != sf::SoundSource::Status::Playing) {
-				this->sound.play();
-				//	std::cout << "Sound is playing." << std::endl; // Логирование
-				//}
-			}
-		}
-		else {
-			this->mIsShowCursorButtons = false;
-			this->isAnyButtonEntered = false;
-		}
-
-		//if (sound.getStatus() != sf::SoundSource::Status::Playing) {
-		//	sound.play();
-		//	std::cout << "Sound is playing." << std::endl; // Логирование
-		//}
-
-		if (exitButtonEntered) this->mNumberOfMenu = 3;
-		if (settingsButtonEntered) {
-			this->mNumberOfMenu = 2;
-			///
-		};
-		if (playButtonEntered) this->mNumberOfMenu = 1;
-		if (!exitButtonEntered && !settingsButtonEntered && !playButtonEntered) this->mNumberOfMenu = 0;
-
-		if (!this->mIsMenuInitialazed) {
+		if (!this->mIsTimeForMenuInitializingElapsed) {
 			this->mTimeForAnimationMenuInitializing = G.getClock().getElapsedTime().asMilliseconds();
 		}
 
-		// HOW I NEED WORK WIN FLOAT AND INT HERE???
-		// ALL PADDINGS IS NORMALY BECAUSE ALL BUTTONS HAS 28PX HEIGHT
-		if (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing <= this->mAnimationDurationMenuInitializing) {
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) },
-				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons))
-			);
+		bool isShowAnimation = (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing > this->mAnimationDurationMenuInitializing) && this->pMenuSettings.get() == nullptr;
 
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) },
-				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons))
-			);
+		bool exitButtonEntered = this->mExitButtonAnimation.showAnimation(G, isShowAnimation);
+		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, isShowAnimation);
+		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, isShowAnimation);
 
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) },
-				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent))
-			);
-
-			this->mIsMenuInitialazed = true;
+		if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
+			// This dynamic memory or not?
+			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
+			window.setMouseCursor(cursor);
+		
+			if (!this->mIsPlayingSound) {
+				this->mIsPlayingSound = true;
+				
+				if (this->mEnteredElementSound.getStatus() != sf::SoundSource::Status::Playing) {
+					this->mEnteredElementSound.play();
+				}
+			}
 		}
 		else {
-			// Конечные значения для кнопок
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) },
-				(float)this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (3 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::PLAY_BUTTON).second + this->mIndent + 2 * this->mSpaceBetweenButtons))
-			);
+			this->mIsPlayingSound = false;
 
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) },
-				(float)this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (2 * G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SETTINGS_BUTTON).second + this->mIndent + this->mSpaceBetweenButtons))
-			);
-
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) },
-				(float)this->mIndent,
-				(float)(G.getSettings().getHeightWindow() - (G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second + mIndent))
-			);
+			// This dynamic memory or not?
+			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
+			window.setMouseCursor(cursor);
 		}
 
+		if (exitButtonEntered) this->mNumberOfMenu = 3;
+		if (settingsButtonEntered) this->mNumberOfMenu = 2;
+		if (playButtonEntered) this->mNumberOfMenu = 1;
+		if (!exitButtonEntered && !settingsButtonEntered && !playButtonEntered) this->mNumberOfMenu = 0;
+
+		if (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing <= this->mAnimationDurationMenuInitializing) {
+			float indentForAllButtons = (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuInitializing) / (float)this->mAnimationDurationMenuInitializing * this->mIndent;
+
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) },
+				indentForAllButtons, (float)(this->mPosYExitButton)
+			);
+		
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) },
+				indentForAllButtons, (float)(this->mPosYSettingsButton)
+			);
+
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) },
+				indentForAllButtons, (float)(this->mPosYPlayButton)
+			);
+		
+			this->mIsTimeForMenuInitializingElapsed = true;
+		}
+		else {
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->exitButton), std::ref(pShapes.get()->exitButtonBackground), std::ref(pShapes.get()->exitButtonMask) }, this->mIndent, this->mPosYExitButton
+			);
+
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->settingsButton), std::ref(pShapes.get()->settingsButtonBackground), std::ref(pShapes.get()->settingsButtonMask) }, this->mIndent, this->mPosYSettingsButton
+			);
+
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->playButton), std::ref(pShapes.get()->playButtonBackground), std::ref(pShapes.get()->playButtonMask) }, this->mIndent, this->mPosYPlayButton
+			);
+		}
 
 		window.draw(this->pShapes.get()->backgroundImage);
 
@@ -208,7 +195,6 @@ public:
 
 		if (this->mNumberOfMenu == 2 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
 			this->pMenuSettings.reset(new MenuSettings(G));
-			std::cout << "Settings" << std::endl;
 		}
 
 		if (this->mNumberOfMenu == 1 && G.getInputsObserver().getIsLeftMouseButtonPressed()) {
@@ -229,7 +215,7 @@ public:
 			window.draw(this->pShapes.get()->exitButton);
 		}
 		else {
-			this->pMenuSettings.get()->showMenuSettings(G);
+			this->pMenuSettings.get()->show(G);
 		}
 	}
 };

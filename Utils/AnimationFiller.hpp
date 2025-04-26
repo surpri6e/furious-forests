@@ -11,9 +11,6 @@ private:
 	std::uint32_t mTimeForAnimationForward;
 	std::uint32_t mTimeForAnimationBack;
 
-	std::uint32_t mTimeForAnimationForwardRemainder;
-	std::uint32_t mTimeForAnimationBackRemainder;
-
 	sf::RectangleShape& mElement;
 	sf::RectangleShape& mElementBackground;
 	sf::RectangleShape& mElementMask;
@@ -28,14 +25,15 @@ private:
 
 	float mWidthMask;
 public:
-	AnimationFiller(sf::RectangleShape& element,
+	AnimationFiller(
+		sf::RectangleShape& element,
 		sf::RectangleShape& elementBackground,
 		sf::RectangleShape& elementMask,
 		const ShapeNumbers<int>& numbers,
 		const sf::Texture& texture,
 		const sf::Color& backgroundButtonColor,
 		const sf::Color& maskButtonColor,
-		const std::uint32_t animationDuration = 200
+		const std::uint32_t animationDuration = 300
 	) :	
 		mElement(element), 
 		mElementBackground(elementBackground), 
@@ -48,6 +46,9 @@ public:
 	{
 		this->mIsMouseEntered = false;
 		this->mWidthMask = 0;
+
+		this->mTimeForAnimationForward = 0;
+		this->mTimeForAnimationBack = 0;
 
 		initializer::shapeInitialize(
 			this->mElement,
@@ -68,24 +69,9 @@ public:
 		);
 	}
 
-	//void setNumbers(const ShapeInitializeNumbers<int>& numbers)
-
 	// HOW I NEED WORK WIN FLOAT AND INT HERE???
-	bool showAnimation(General& G, const bool isShowCursor, const bool isShow = true) {
-
-		//isShowCursor ÏÎËÍÀß ÁÊÅÑÏÎËÅÇÍÎÑÒÜ!!!!
+	bool showAnimation(General& G, const bool isShow = true) {
 		if (!isShow) return false;
-
-		if (isShowCursor) {
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
-			G.getWindow().setMouseCursor(cursor);
-		}
-		else {
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
-			G.getWindow().setMouseCursor(cursor);
-		}
 
 		decltype(auto) inputsObserver = G.getInputsObserver();
 
@@ -135,8 +121,7 @@ public:
 
 			this->mIsMouseEntered = true;
 		}
-		//
-
+		
 		return this->mIsMouseEntered;
 	}
 };

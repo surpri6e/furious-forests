@@ -34,7 +34,7 @@ public:
 		this->mWalkGrass.setVolume(100.f);
 	}
 
-	sf::Sound getEnterElement() {
+	sf::Sound& getEnterElement() {
 		return this->mEnterElement;
 	}
 

@@ -70,7 +70,7 @@ int main() {
         window.clear(sf::Color::Black);
 
         if (menu.get() != nullptr) {
-            menu.get()->showMenu(G);
+            menu.get()->show(G);
         }
 
         // .display() ONLY HERE!

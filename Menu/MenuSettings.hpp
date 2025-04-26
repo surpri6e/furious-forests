@@ -4,6 +4,7 @@
 #include "../Core/General.hpp"
 #include "../Utils/Initializer.hpp"
 #include "../Utils/ModifyShapes.hpp"
+#include "MenuText.hpp"
 
 struct MenuSettingsShapes {
 	sf::RectangleShape saveButton;
@@ -17,184 +18,141 @@ struct MenuSettingsShapes {
 	sf::RectangleShape border;
 	sf::RectangleShape background;
 
-	sf::RectangleShape isBackgroundMusicPlayingCheckbox;
-	sf::RectangleShape mIsWindowFullscreenCheckbox;
-	sf::RectangleShape mIsPlayingFemaleCheckbox;
+	sf::RectangleShape backgroundMusicPlayingCheckbox;
+	sf::RectangleShape windowFullscreenCheckbox;
+	sf::RectangleShape playingFemaleCheckbox;
 };
 
 class MenuSettings {
 private:
 	std::unique_ptr<MenuSettingsShapes> pShapes = std::make_unique<MenuSettingsShapes>();
 
-	// уточнить у люды
-	const int mSizeOfBorderIndent = 54;
+	const int mIndentWidth = 10;
+	const int mIndentHeight = 15;
+	const int mSpaceBetweenLines = 40;
 
-	const int mIndentWidth = 20;
-	const int mIndentHeight = 30;
-	const int mSpaceBetween = 40;
+	const float mWidthBackground;
+	const float mHeightBackground;
+	const float mPosXBackground;
+	const float mPosYBackground;
 
-	bool mIsMenuSettingsInitialazed;
+	const int mSizeOfBorder;
+
+	const int mSizeOfCheckbox = 32;
+
+	bool mIsTimeForMenuSettingsInitializingElapsed;
 	const std::uint32_t mAnimationDurationMenuSettingsInitializing = 500;
 	std::uint32_t mTimeForAnimationMenuSettingsInitializing;
 
-
-	/* 1
-		isWindowFullscreen 1
-		playerGender 0*/
-
-	bool isIsBackgroundMusicPlayingEntered;
-	bool isIsWindowFullscreenEntered;
-	bool isIsPlayingFemaleEntered;
-
-	sf::Text mIsBackgroundMusicPlayingText;
-	sf::Text mIsWindowFullscreenText;
-	sf::Text mIsPlayingFemaleText;
+	sf::Text mBackgroundMusicPlayingText;
+	sf::Text mWindowFullscreenText;
+	sf::Text mPlayingFemaleText;
 public: 
-	//MenuSettings() {}
-	MenuSettings(General& G): mIsBackgroundMusicPlayingText(G.getFontsManager()->getMain()), mIsWindowFullscreenText(G.getFontsManager()->getMain()), mIsPlayingFemaleText(G.getFontsManager()->getMain()) {
-		decltype(auto) texturesManager = G.getTexturesManager();
-		decltype(auto) texturesSizes = texturesManager->getTexturesSizes();
+	MenuSettings(General& G): 
+		mWidthBackground(G.getSettings().getWidthWindow() / 3),
+		mHeightBackground(G.getSettings().getHeightWindow() / 1.2),
+		mPosXBackground(G.getSettings().getWidthWindow() / 2 - G.getSettings().getWidthWindow() / 6),
+		mPosYBackground(G.getSettings().getHeightWindow() / 2 - G.getSettings().getHeightWindow() / 2.4),
+		mSizeOfBorder(16 * this->mWidthBackground / (float)(G.getTexturesManager()->getTexturesSizes().at(paths::textures::menu::SETTINGS_BORDER_MENU).first)),
+		mBackgroundMusicPlayingText(menuText(G, "Background music play:", 
+			this->mPosXBackground + this->mSizeOfBorder + this->mIndentWidth,
+			this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight
+		)),
+		mWindowFullscreenText(menuText(G, "Fullscreen:", 
+			this->mPosXBackground + this->mSizeOfBorder + this->mIndentWidth,
+			this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines + 18
+		)),
+		mPlayingFemaleText(menuText(G, "Play as female:", 
+			this->mPosXBackground + this->mSizeOfBorder + this->mIndentWidth,
+			this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines * 2 + 18 * 2
+		))
+	{
 		decltype(auto) settings = G.getSettings();
+		decltype(auto) texturesManager = G.getTexturesManager();
 
-		//dynamic memory or not?
-		const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
-		G.getWindow().setMouseCursor(cursor);
+		this->mIsTimeForMenuSettingsInitializingElapsed = false;
 
-		this->isIsBackgroundMusicPlayingEntered = false;
-		this->isIsWindowFullscreenEntered = false;
-		this->isIsPlayingFemaleEntered = false;
-
+		this->mTimeForAnimationMenuSettingsInitializing = 0;
 
 		initializer::shapeInitialize<float>(
 			this->pShapes.get()->border,
-			{
-				(float)(settings.getWidthWindow() / 3),
-				(float)(settings.getHeightWindow() / 1.2),
-				(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6),
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4)
-			},
-			texturesManager->getSettingsBorderMenu()
+			{this->mWidthBackground, this->mHeightBackground, this->mPosXBackground, this->mPosYBackground },
+			G.getTexturesManager()->getSettingsBorderMenu()
 		);
-
 		initializer::shapeInitialize<float>(
 			this->pShapes.get()->background,
-			{
-				(float)(settings.getWidthWindow() / 3),
-				(float)(settings.getHeightWindow() / 1.2),
-				(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6),
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4)
-			},
+			{this->mWidthBackground, this->mHeightBackground, this->mPosXBackground, this->mPosYBackground },
 			sf::Color(217, 192, 124)
 		);
 
-		this->mIsMenuSettingsInitialazed = false;
-
-		// Свой класс под текст
-		mIsBackgroundMusicPlayingText.setCharacterSize(16);
-		mIsBackgroundMusicPlayingText.setFillColor(sf::Color::Black);
-		mIsBackgroundMusicPlayingText.setString("Background music play:");
-		mIsBackgroundMusicPlayingText.setPosition(sf::Vector2f(
-			(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + this->mSizeOfBorderIndent + this-> mIndentWidth,
-			(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight
-		));
 		initializer::shapeInitialize<float>(
-			this->pShapes.get()->isBackgroundMusicPlayingCheckbox,
+			this->pShapes.get()->backgroundMusicPlayingCheckbox,
 			{
-				(float)32,
-				(float)32,
-				(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + (float)(settings.getWidthWindow() / 3) - 32 - this->mSizeOfBorderIndent - this->mIndentWidth,
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight - 8
+				(float)this->mSizeOfCheckbox, 
+				(float)this->mSizeOfCheckbox,
+				this->mPosXBackground + this->mWidthBackground - this->mSizeOfBorder - this->mIndentWidth - this->mSizeOfCheckbox,
+				this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight - this->mSizeOfCheckbox / 4
 			},
 			settings.getIsBackgroundMusicPlaying() ? texturesManager->getCheckboxTrue() : texturesManager->getCheckboxFalse()
 		);
 
-		// 16 size of text
-
-		mIsWindowFullscreenText.setCharacterSize(16);
-		mIsWindowFullscreenText.setFillColor(sf::Color::Black);
-		mIsWindowFullscreenText.setString("Fullscreen:");
-		mIsWindowFullscreenText.setPosition(sf::Vector2f(
-			(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + this->mSizeOfBorderIndent + this->mIndentWidth,
-			(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight + 16 + this->mSpaceBetween
-		));
 		initializer::shapeInitialize<float>(
-			this->pShapes.get()->mIsWindowFullscreenCheckbox,
+			this->pShapes.get()->windowFullscreenCheckbox,
 			{
-				(float)32,
-				(float)32,
-				(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + (float)(settings.getWidthWindow() / 3) - 32 - this->mSizeOfBorderIndent - this->mIndentWidth,
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight + 16 + this->mSpaceBetween - 8
+				(float)this->mSizeOfCheckbox,
+				(float)this->mSizeOfCheckbox,
+				this->mPosXBackground + this->mWidthBackground - this->mSizeOfBorder - this->mIndentWidth - this->mSizeOfCheckbox,
+				this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines + 18 - this->mSizeOfCheckbox / 4
 			},
 			settings.getIsWindowFullscreen() ? texturesManager->getCheckboxTrue() : texturesManager->getCheckboxFalse()
 		);
 
-		mIsPlayingFemaleText.setCharacterSize(16);
-		mIsPlayingFemaleText.setFillColor(sf::Color::Black);
-		mIsPlayingFemaleText.setString("Play as female:");
-		mIsPlayingFemaleText.setPosition(sf::Vector2f(
-			(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + this->mSizeOfBorderIndent + this->mIndentWidth,
-			(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight + 2 * 16 + 2 * this->mSpaceBetween
-		));
-
 		initializer::shapeInitialize<float>(
-			this->pShapes.get()->mIsPlayingFemaleCheckbox,
+			this->pShapes.get()->playingFemaleCheckbox,
 			{
-				(float)32,
-				(float)32,
-				(float)(settings.getWidthWindow() / 2 - settings.getWidthWindow() / 6) + (float)(settings.getWidthWindow() / 3) - 32 - this->mSizeOfBorderIndent - this->mIndentWidth,
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4) + this->mSizeOfBorderIndent + this->mIndentHeight + 2 * 16 + 2 * this->mSpaceBetween - 8
+				(float)this->mSizeOfCheckbox,
+				(float)this->mSizeOfCheckbox,
+				this->mPosXBackground + this->mWidthBackground - this->mSizeOfBorder - this->mIndentWidth - this->mSizeOfCheckbox,
+				this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines * 2 + 18 * 2 - this->mSizeOfCheckbox / 4
 			},
 			settings.getPlayerGender() ? texturesManager->getCheckboxTrue() : texturesManager->getCheckboxFalse()
 		);
 	}
 
-	void showMenuSettings(General& G) {
+	void show(General& G) {
 		decltype(auto) window = G.getWindow();
 		decltype(auto) settings = G.getSettings();
 
-		if (!this->mIsMenuSettingsInitialazed) {
+		if (!this->mIsTimeForMenuSettingsInitializingElapsed) {
 			this->mTimeForAnimationMenuSettingsInitializing = G.getClock().getElapsedTime().asMilliseconds();
 		}
 
-		// HOW I NEED WORK WIN FLOAT AND INT HERE???
-		// ALL PADDINGS IS NORMALY BECAUSE ALL BUTTONS HAS 28PX HEIGHT
 		if (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuSettingsInitializing <= this->mAnimationDurationMenuSettingsInitializing) {
-			modshapes::changePosition(
+			modshapes::setPosition(
 				{ std::ref(pShapes.get()->background), std::ref(pShapes.get()->border) },
 				pShapes.get()->background.getPosition().x,
-				(float)(((G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuSettingsInitializing) / (float)this->mAnimationDurationMenuSettingsInitializing) * (float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4))
+				(G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuSettingsInitializing) / (float)this->mAnimationDurationMenuSettingsInitializing * this->mPosYBackground
 			);
 		
-			this->mIsMenuSettingsInitialazed = true;
+			this->mIsTimeForMenuSettingsInitializingElapsed = true;
 		}
 		else {
-			// end values
-			modshapes::changePosition(
-				{ std::ref(pShapes.get()->background), std::ref(pShapes.get()->border) },
-				pShapes.get()->background.getPosition().x,
-				(float)(settings.getHeightWindow() / 2 - settings.getHeightWindow() / 2.4)
+			modshapes::setPosition(
+				{ std::ref(pShapes.get()->background), std::ref(pShapes.get()->border) }, pShapes.get()->background.getPosition().x, this->mPosYBackground
 			);
 		}
-
-		this->isIsBackgroundMusicPlayingEntered = false;
-		this->isIsWindowFullscreenEntered = false;
-		this->isIsPlayingFemaleEntered = false;
 
 		window.draw(this->pShapes->background);
 		window.draw(this->pShapes->border);
 
 		if (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationMenuSettingsInitializing > this->mAnimationDurationMenuSettingsInitializing) {
-			window.draw(this->mIsBackgroundMusicPlayingText);
-			window.draw(this->mIsWindowFullscreenText);
-			window.draw(this->mIsPlayingFemaleText);
+			window.draw(this->mBackgroundMusicPlayingText);
+			window.draw(this->mWindowFullscreenText);
+			window.draw(this->mPlayingFemaleText);
 
-			window.draw(this->pShapes.get()->isBackgroundMusicPlayingCheckbox);
-			window.draw(this->pShapes.get()->mIsPlayingFemaleCheckbox);
-			window.draw(this->pShapes.get()->mIsWindowFullscreenCheckbox);
+			window.draw(this->pShapes.get()->backgroundMusicPlayingCheckbox);
+			window.draw(this->pShapes.get()->playingFemaleCheckbox);
+			window.draw(this->pShapes.get()->windowFullscreenCheckbox);
 		}
-
-		//window.draw(this->backgroundImage);
-		//
-		//window.draw(this->checkbox);
 	}
 };
