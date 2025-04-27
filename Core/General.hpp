@@ -22,7 +22,23 @@ private:
 	sf::Clock mClock;
 	sf::View mCamera;
 public:
-	General(sf::RenderWindow& window, Settings& settings, InputsObserver& inputsObserver) : mWindow(window), mSettings(settings), mInputsObserver(inputsObserver) {}
+	General(sf::RenderWindow& window, Settings& settings, InputsObserver& inputsObserver) : mWindow(window), mSettings(settings), mInputsObserver(inputsObserver) {
+		this->mWindow.setFramerateLimit(this->mSettings.getFramerateLimit());
+		this->pSoundsManager.get()->setSoundsVolume(this->mSettings.getSoundsVolume());
+	}
+
+	void updateSettings() {
+		this->mWindow.close();
+		this->mWindow.create(
+			sf::VideoMode({ (unsigned int)this->mSettings.getWidthWindow(), (unsigned int)this->mSettings.getHeightWindow() }),
+			"Furious forests",
+			sf::Style::Close,
+			this->mSettings.getIsWindowFullscreen() ? sf::State::Fullscreen : sf::State::Windowed
+		);
+
+		this->mWindow.setFramerateLimit(this->mSettings.getFramerateLimit());
+		this->pSoundsManager.get()->setSoundsVolume(this->mSettings.getSoundsVolume());
+	}
 
 	sf::View& getCamera() {
 		return this->mCamera;

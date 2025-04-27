@@ -85,7 +85,7 @@ public:
 		bool mouseOver = sf::IntRect(sf::Vector2i(this->mPosX, this->mPosY), sf::Vector2i(this->mWidth, this->mHeight)).contains(sf::Vector2i(inputsObserver.getMousePositionX(), inputsObserver.getMousePositionY()));
 
 		if (!mouseOver) {
-			if (!this->mIsMouseEntered && G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationBack <= this->mAnimationDuration) {
+			if (!this->mIsMouseEntered && G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationBack <= this->mAnimationDuration + 20) { // 20 - something constant
 				float progress = (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationBack) / (float)this->mAnimationDuration;
 
 				this->mElementMask.setSize(
@@ -104,7 +104,7 @@ public:
 		}
 
 		if (mouseOver) {
-			if (this->mIsMouseEntered && G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationForward <= this->mAnimationDuration) {
+			if (this->mIsMouseEntered && G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationForward <= this->mAnimationDuration + 20) { // 20 - something constant
 				float progress = (G.getClock().getElapsedTime().asMilliseconds() - this->mTimeForAnimationForward) / (float)this->mAnimationDuration;
 
 				this->mElementMask.setSize(

@@ -127,25 +127,27 @@ public:
 		bool settingsButtonEntered = this->mSettingsButtonAnimation.showAnimation(G, isShowAnimation);
 		bool playButtonEntered = this->mPlayButtonAnimation.showAnimation(G, isShowAnimation);
 
-		if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
-			window.setMouseCursor(cursor);
-		
-			if (!this->mIsPlayingSound) {
-				this->mIsPlayingSound = true;
-				
-				if (this->mEnteredElementSound.getStatus() != sf::SoundSource::Status::Playing) {
-					this->mEnteredElementSound.play();
+		if (this->pMenuSettings.get() == nullptr) {
+			if (exitButtonEntered || settingsButtonEntered || playButtonEntered) {
+				// This dynamic memory or not?
+				const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
+				window.setMouseCursor(cursor);
+
+				if (!this->mIsPlayingSound) {
+					this->mIsPlayingSound = true;
+
+					if (this->mEnteredElementSound.getStatus() != sf::SoundSource::Status::Playing) {
+						this->mEnteredElementSound.play();
+					}
 				}
 			}
-		}
-		else {
-			this->mIsPlayingSound = false;
+			else {
+				this->mIsPlayingSound = false;
 
-			// This dynamic memory or not?
-			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
-			window.setMouseCursor(cursor);
+				// This dynamic memory or not?
+				const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
+				window.setMouseCursor(cursor);
+			}
 		}
 
 		if (exitButtonEntered) this->mNumberOfMenu = 3;
@@ -215,7 +217,11 @@ public:
 			window.draw(this->pShapes.get()->exitButton);
 		}
 		else {
-			this->pMenuSettings.get()->show(G);
+			bool isClosingMenuSettings = this->pMenuSettings.get()->show(G);
+
+			if (isClosingMenuSettings) {
+				this->pMenuSettings.reset(nullptr);
+			}
 		}
 	}
 };

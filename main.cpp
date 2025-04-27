@@ -13,6 +13,7 @@ int main() {
     auto window = sf::RenderWindow(
         sf::VideoMode({ (unsigned int)settings.getWidthWindow(), (unsigned int)settings.getHeightWindow() }),
         "Furious forests",
+        sf::Style::Close,
         settings.getIsWindowFullscreen() ? sf::State::Fullscreen : sf::State::Windowed
     );
 
@@ -44,6 +45,7 @@ int main() {
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) inputsObserver.setIsEscapePressed(true);
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Enter) inputsObserver.setIsEnterPressed(true);
+                if (keyPressed->scancode == sf::Keyboard::Scancode::LShift) inputsObserver.setIsShiftPressed(true);
 
                 if (keyPressed->scancode == sf::Keyboard::Scancode::W) inputsObserver.setIsWPressed(true);
                 if (keyPressed->scancode == sf::Keyboard::Scancode::A) inputsObserver.setIsAPressed(true);
@@ -56,6 +58,7 @@ int main() {
             if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
                 if (keyReleased->scancode == sf::Keyboard::Scancode::Escape) inputsObserver.setIsEscapePressed(false);
                 if (keyReleased->scancode == sf::Keyboard::Scancode::Enter) inputsObserver.setIsEnterPressed(false);
+                if (keyReleased->scancode == sf::Keyboard::Scancode::LShift) inputsObserver.setIsShiftPressed(false);
 
                 if (keyReleased->scancode == sf::Keyboard::Scancode::W) inputsObserver.setIsWPressed(false);
                 if (keyReleased->scancode == sf::Keyboard::Scancode::A) inputsObserver.setIsAPressed(false);

@@ -18,6 +18,7 @@ private:
 
 	bool mIsEscapePressed;
 	bool mIsEnterPressed;
+	bool mIsShiftPressed;
 public: 
 	InputsObserver() {
 		this->mIsLeftMouseButtonPressed = false;
@@ -35,6 +36,7 @@ public:
 
 		this->mIsEscapePressed = false;
 		this->mIsEnterPressed = false;
+		this->mIsShiftPressed = false;
 	}
 
 	void setIsLeftMouseButtonPressed(const bool isLeftMouseButtonPressed) {
@@ -119,5 +121,13 @@ public:
 	}
 	const bool getIsEnterPressed() {
 		return this->mIsEnterPressed;
+	}
+
+	// Shift
+	void setIsShiftPressed(const bool isShiftPressed) {
+		this->mIsShiftPressed = isShiftPressed;
+	}
+	const bool getIsShiftPressed() {
+		return this->mIsShiftPressed;
 	}
 };

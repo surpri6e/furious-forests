@@ -44,6 +44,8 @@ private:
 	sf::Texture mPlayButton;
 	sf::Texture mExitButton;
 	sf::Texture mSettingsButton;
+	sf::Texture mSaveButton;
+	sf::Texture mNextElementButton;
 
 	// MENU 
 	sf::Texture mBackgroundImageMenu;
@@ -85,6 +87,8 @@ public:
 		initializer::textureInitialize(this->mPlayButton, paths::previousDirectory + paths::textures::buttons::PLAY_BUTTON);
 		initializer::textureInitialize(this->mExitButton, paths::previousDirectory + paths::textures::buttons::EXIT_BUTTON);
 		initializer::textureInitialize(this->mSettingsButton, paths::previousDirectory + paths::textures::buttons::SETTINGS_BUTTON);
+		initializer::textureInitialize(this->mSaveButton, paths::previousDirectory + paths::textures::buttons::SAVE_BUTTON);
+		initializer::textureInitialize(this->mNextElementButton, paths::previousDirectory + paths::textures::buttons::NEXT_ELEMENT_BUTTON);
 
 		// MENU 
 		initializer::textureInitialize(this->mBackgroundImageMenu, paths::previousDirectory + paths::textures::menu::BACKGROUND_IMAGE_MENU);
@@ -119,6 +123,13 @@ public:
 
 	const sf::Texture& getExitButton() const {
 		return this->mExitButton;
+	}
+
+	const sf::Texture& getSaveButton() const {
+		return this->mSaveButton;
+	}
+	const sf::Texture& getNextElementButton() const {
+		return this->mNextElementButton;
 	}
 
 	const sf::Texture& getSettingsButton() const {

@@ -29,9 +29,11 @@ private:
 	sf::Sound mEnterElement;
 	sf::Sound mWalkGrass;
 public:
-	SoundsManager(const SoundsBuffersManager* soundsBuffersManager) : mEnterElement(soundsBuffersManager->getEnterElementBuffer()), mWalkGrass(soundsBuffersManager->getWalkGrassBuffer()) {
-		this->mEnterElement.setVolume(100.f);
-		this->mWalkGrass.setVolume(100.f);
+	SoundsManager(const SoundsBuffersManager* soundsBuffersManager) : mEnterElement(soundsBuffersManager->getEnterElementBuffer()), mWalkGrass(soundsBuffersManager->getWalkGrassBuffer()) {}
+
+	void setSoundsVolume(int volume) {
+		this->mEnterElement.setVolume(volume);
+		this->mWalkGrass.setVolume(volume);
 	}
 
 	sf::Sound& getEnterElement() {

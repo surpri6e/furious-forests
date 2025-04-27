@@ -19,6 +19,8 @@ namespace paths {
 		namespace buttons {
 			const std::string directoryName = "buttons/";
 
+			const std::string NEXT_ELEMENT_BUTTON = paths::textures::directoryName + directoryName + "next_element_button.png";
+			const std::string SAVE_BUTTON = paths::textures::directoryName + directoryName + "save_button.png";
 			const std::string PLAY_BUTTON = paths::textures::directoryName + directoryName + "play_button.png";
 			const std::string SETTINGS_BUTTON = paths::textures::directoryName + directoryName + "settings_button.png";
 			const std::string EXIT_BUTTON = paths::textures::directoryName + directoryName + "exit_button.png";

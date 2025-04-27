@@ -1,5 +1,9 @@
 textures/buttons/play_button.png 88 28
 textures/buttons/settings_button.png 168 28
 textures/buttons/exit_button.png 84 28
+textures/buttons/save_button.png 90 28
+textures/buttons/next_element_button.png 32 32
 textures/menu/background_image.png 400 200
 textures/menu/settings_border_menu.png 200 400
+textures/icons/checkbox_false.png 32 32
+textures/icons/checkbox_true.png 32 32
