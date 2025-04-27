@@ -98,7 +98,7 @@ public:
 		return this->mCurrentSettingsInterface.heightWindow.second;
 	}
 
-	const bool getSoundsVolume() {
+	const int getSoundsVolume() {
 		return this->mCurrentSettingsInterface.soundsVolume.second;
 	}
 
@@ -106,7 +106,7 @@ public:
 		return this->mCurrentSettingsInterface.isWindowFullscreen.second;
 	}
 
-	const std::string getPlayerGender() {
+	const std::string getPlayerName() {
 		return this->mCurrentSettingsInterface.playerName.second;
 	}
 };

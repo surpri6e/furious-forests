@@ -43,7 +43,14 @@ class MenuSettings {
 private:
 	std::unique_ptr<MenuSettingsShapes> pShapes = std::make_unique<MenuSettingsShapes>();
 
+	sf::Sound& mEnteredElementSound;
+	bool mIsPlayingSound;
+
 	SettingsInterface mPreSavedSettings;
+
+	const sf::Color mNextElementBackgroundColor = sf::Color(135, 120, 84);
+	const sf::Color mNextElementMaskColor = sf::Color(64, 56, 40, 0.4 * 255);
+	const sf::Color mNextElementBorderColor = sf::Color(64, 56, 40);
 
 	const int mIndentWidth = 10;
 	const int mIndentHeight = 15;
@@ -86,6 +93,7 @@ private:
 	bool mIsSetWindowFullscreenOne;
 public: 
 	MenuSettings(General& G) :
+		mEnteredElementSound(G.getSoundsManager()->getEnterElement()),
 		mPreSavedSettings(G.getSettings().getCopySettings()),
 		mWidthBackground(G.getSettings().getWidthWindow() / 3),
 		mHeightBackground(G.getSettings().getHeightWindow() / 1.2),
@@ -119,8 +127,8 @@ public:
 				(int)(this->mPosYBackground + this->mHeightBackground - this->mSizeOfBorder - this->mIndentHeight - G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::EXIT_BUTTON).second)
 			},
 			G.getTexturesManager()->getExitButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			sf::Color(212, 47, 55),
+			sf::Color(171, 21, 33, 0.5 * 255)
 		),
 		mSaveButtonAnimation(
 			this->pShapes.get()->saveButton,
@@ -133,8 +141,8 @@ public:
 				(int)(this->mPosYBackground + this->mHeightBackground - this->mSizeOfBorder - this->mIndentHeight - G.getTexturesManager()->getTexturesSizes().at(paths::textures::buttons::SAVE_BUTTON).second)
 			},
 			G.getTexturesManager()->getSaveButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			sf::Color(139, 179, 30),
+			sf::Color(112, 143, 26, 0.5 * 255)
 		),
 		mValueSoundsVolumeText(menuTextSmall(G, std::to_string(this->mPreSavedSettings.soundsVolume.second),
 			this->mPosXBackground + this->mWidthBackground - this->mSizeOfBorder - this->mIndentWidth - this->mSizeOfCheckbox - 100,
@@ -159,8 +167,8 @@ public:
 				(int)(this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines * 3 + 18 * 3 - this->mSizeOfCheckbox / 4)
 			},
 			G.getTexturesManager()->getNextElementButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			this->mNextElementBackgroundColor,
+			this->mNextElementMaskColor
 		),
 		mNextPlayerNameButtonAnimation(
 			this->pShapes.get()->nextPlayerNameButton,
@@ -173,8 +181,8 @@ public:
 				(int)(this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight + this->mSpaceBetweenLines * 2 + 18 * 2 - this->mSizeOfCheckbox / 4)
 			},
 			G.getTexturesManager()->getNextElementButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			this->mNextElementBackgroundColor,
+			this->mNextElementMaskColor
 		),
 		mNextSoundsVolumeButtonAnimation(
 			this->pShapes.get()->nextSoundsVolumeButton,
@@ -187,8 +195,8 @@ public:
 				(int)(this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight - this->mSizeOfCheckbox / 4)
 			},
 			G.getTexturesManager()->getNextElementButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			this->mNextElementBackgroundColor,
+			this->mNextElementMaskColor
 		),
 		mPrevSoundsVolumeButtonAnimation(
 			this->pShapes.get()->prevSoundsVolumeButton,
@@ -201,8 +209,8 @@ public:
 				(int)(this->mPosYBackground + this->mSizeOfBorder + this->mIndentHeight - this->mSizeOfCheckbox / 4)
 			},
 			G.getTexturesManager()->getNextElementButton(),
-			sf::Color(237, 122, 114),
-			sf::Color(161, 53, 45, 0.4 * 255)
+			this->mNextElementBackgroundColor,
+			this->mNextElementMaskColor
 		)
 	{
 		decltype(auto) settings = G.getSettings();
@@ -211,6 +219,8 @@ public:
 		this->mIsTimeForMenuSettingsInitializingElapsed = false;
 
 		this->mTimeForAnimationMenuSettingsInitializing = 0;
+
+		this->mIsPlayingSound = false;
 
 		initializer::shapeInitialize<float>(
 			this->pShapes.get()->border,
@@ -236,6 +246,19 @@ public:
 
 		this->pShapes.get()->prevSoundsVolumeButton.setScale(sf::Vector2f(-1, 1));
 		this->pShapes.get()->prevSoundsVolumeButton.setPosition(sf::Vector2f(this->pShapes.get()->prevSoundsVolumeButton.getPosition().x + this->mSizeOfCheckbox, this->pShapes.get()->prevSoundsVolumeButton.getPosition().y));
+
+
+		this->pShapes.get()->nextFramerateLimitButton.setOutlineThickness(3);
+		this->pShapes.get()->nextFramerateLimitButton.setOutlineColor(this->mNextElementBorderColor);
+
+		this->pShapes.get()->nextSoundsVolumeButton.setOutlineColor(this->mNextElementBorderColor);
+		this->pShapes.get()->nextSoundsVolumeButton.setOutlineThickness(3);
+
+		this->pShapes.get()->prevSoundsVolumeButton.setOutlineColor(this->mNextElementBorderColor);
+		this->pShapes.get()->prevSoundsVolumeButton.setOutlineThickness(3);
+
+		this->pShapes.get()->nextPlayerNameButton.setOutlineColor(this->mNextElementBorderColor);
+		this->pShapes.get()->nextPlayerNameButton.setOutlineThickness(3);
 
 		this->mIsSetFramerateLimitOne = true;
 		this->mIsSetPlayerNameOne = true;
@@ -273,8 +296,17 @@ public:
 			// This dynamic memory or not?
 			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Hand).value();
 			window.setMouseCursor(cursor);
+
+			if (!this->mIsPlayingSound) {
+				this->mIsPlayingSound = true;
+
+				if (this->mEnteredElementSound.getStatus() != sf::SoundSource::Status::Playing) {
+					this->mEnteredElementSound.play();
+				}
+			}
 		}
 		else {
+			this->mIsPlayingSound = false;
 			// This dynamic memory or not?
 			const auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow).value();
 			window.setMouseCursor(cursor);
